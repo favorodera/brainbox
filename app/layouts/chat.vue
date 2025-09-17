@@ -4,6 +4,7 @@
     unit="rem"
   >
     <UDashboardSidebar
+      v-if="user"
       collapsible
       toggle-side="right"
       :ui="{
@@ -89,4 +90,6 @@
 
 <script setup lang="ts">
 const isCommandPaletteOpen = ref(false)
+
+const user = useSupabaseUser()
 </script>
