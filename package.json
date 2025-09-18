@@ -9,7 +9,8 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "lint": "eslint . --fix",
-    "stage": "nuxt typecheck && npm run lint && nuxt prepare && nuxt build"
+    "stage": "nuxt typecheck && npm run lint && nuxt prepare && nuxt build",
+    "generate:supabase:types":"npx supabase gen types --lang=typescript --project-id jqzpmqexlwunpgdqybvs > ./shared/types/supabase.d.ts"
   },
   "dependencies": {
     "@favorodera/nuxt-helper": "^1.0.11",

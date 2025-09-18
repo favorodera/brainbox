@@ -11,7 +11,10 @@
     :toaster="{ position: 'top-right', progress: false, duration: 4000 }"
   >
     <NuxtRouteAnnouncer />
-    <NuxtLoadingIndicator />
+    <NuxtLoadingIndicator
+      color="white"
+      error-color="red"
+    />
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>

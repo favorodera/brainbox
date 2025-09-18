@@ -10,12 +10,17 @@
       :ui="{
         root: 'transition-all duration-300 ease-in-out bg-elevated/25',
         content: 'max-w-xs',
+        header: 'justify-between',
       }"
     >
 
-      <template #header>
+      <template #header="{ collapsed }">
+        <Logo
+          with-text
+          :ui="{ text: collapsed ? 'hidden' : '' }"
+        />
 
-        <UDashboardSidebarCollapse />
+        <UDashboardSidebarCollapse v-if="!collapsed" />
 
       </template>
 
@@ -37,6 +42,8 @@
             class="w-full"
             @click="isCommandPaletteOpen = true"
           />
+
+          <UDashboardSidebarCollapse v-if="collapsed" />
 
         </div>
 
@@ -64,6 +71,10 @@
 
       </template>
 
+      <template #footer="{ collapsed }">
+        <OverlaysUserMenu :collapsed="collapsed" />
+      </template>
+
     </UDashboardSidebar>
 
     <UDashboardSearch
@@ -89,6 +100,7 @@
 
 
 <script setup lang="ts">
+
 const isCommandPaletteOpen = ref(false)
 
 const user = useSupabaseUser()

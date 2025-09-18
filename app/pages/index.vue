@@ -56,10 +56,11 @@
                 <UButton
                   color="neutral"
                   variant="soft"
-                  icon="lucide:info"
+                  icon="lucide:circle-question-mark"
                 />
               </UDropdownMenu>
             </template>
+            
           </template>
 
         </UDashboardNavbar>

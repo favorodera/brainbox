@@ -1,17 +1,6 @@
 <template>
 
   <UPage>
-
-    <UHeader
-      to="/"
-      :toggle="false"
-    >
-
-      <template #title>
-        <Logo />
-      </template>
-
-    </UHeader>
     
     <UMain
       id="main"
@@ -24,11 +13,17 @@
           description="Access all the features of MyDocs AI"
           :providers="[
             {
-              label: 'GitHub',
-              icon: 'lucide:github',
+              label: 'Continue with GitHub',
+              icon: 'simple-icons:github',
               variant: 'soft',
+              size: 'lg',
               onClick(){
-                auth.signInWithOAuth({ provider: 'github' })
+                auth.signInWithOAuth({
+                  provider: 'github',
+                  options: {
+                    redirectTo,
+                  },
+                })
               },
             },
           ]"
@@ -36,8 +31,10 @@
       
           <template #footer>
             By continuing, you agree to our Terms of Service and Privacy Policy
+
           </template>
         </UAuthForm>
+        
 
       </UPageCard>
     </UMain>
@@ -52,8 +49,8 @@
 
       <UNavigationMenu
         :items="[
-          { label: 'Privacy Policy', to: '', target: '_blank' },
           { label: 'Terms of Service', to: '', target: '_blank' },
+          { label: 'Privacy Policy', to: '', target: '_blank' },
         ]"
         variant="link"
       />
@@ -68,9 +65,11 @@
 const { auth } = useSupabaseClient()
 const user = useSupabaseUser()
 
+const redirectTo = import.meta.dev ? 'http://localhost:3000/callback' : 'https://mydocsai.vercel.app/callback'
+
 watch(user, () => {
   if (user.value) {
-    return navigateTo('/confirm')
+    return navigateTo('/callback')
   }
 }, { immediate: true })
 </script>
