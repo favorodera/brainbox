@@ -28,7 +28,7 @@
 <script setup lang="ts">
 import type { DropdownMenuItem } from '@nuxt/ui'
 
-import { LazyOverlaysSignoutConfirmation } from '#components'
+import { LazyOverlaysSignoutConfirmation, LazyOverlaysSettings } from '#components'
 
 defineProps<{
   collapsed?: boolean
@@ -36,6 +36,7 @@ defineProps<{
 
 const overlay = useOverlay()
 const signOutConfirmationModal = overlay.create(LazyOverlaysSignoutConfirmation)
+const settingsModal = overlay.create(LazyOverlaysSettings)
 
 const { data: user } = await useUserStore('user')
 
@@ -56,6 +57,7 @@ const dropdownMenuItems = ref<DropdownMenuItem[][]>([
     {
       label: 'Settings',
       icon: 'lucide:settings',
+      onSelect: () => settingsModal.open(),
     },
   ],
 
