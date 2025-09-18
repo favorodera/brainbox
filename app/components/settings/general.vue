@@ -1,6 +1,6 @@
 <template>
 
-  <div class="flex flex-col gap-2">
+  <div class="space-y-2">
 
     <h3 class="line-clamp-1 w-full text-lg font-normal">
       General

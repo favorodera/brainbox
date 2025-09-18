@@ -38,11 +38,17 @@
 
       <USeparator class="min-sm:hidden" />
 
-      <div class="flex-1 p-2 px-4 sm:px-2">
+      <div class="flex-1 p-2">
 
-        <KeepAlive>
-          <component :is="activeTab" />
-        </KeepAlive>
+        <Transition
+          name="page-layout-transition"
+          mode="out-in"
+        >
+          <KeepAlive>
+            <component :is="activeTab" />
+          </KeepAlive>
+        </Transition>
+       
 
       </div>
      

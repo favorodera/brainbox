@@ -1,6 +1,6 @@
 <template>
 
-  <div class="flex flex-col gap-2">
+  <div class="space-y-2">
 
     <h3 class="line-clamp-1 w-full text-lg font-normal">
       Personalization
@@ -8,7 +8,19 @@
 
     <USeparator />
 
-    <div class="flex items-center justify-between" />
+    <div class="flex items-center justify-between">
+
+      <p>
+        URLs
+      </p>
+
+      <UButton
+        color="neutral"
+        variant="link"
+        label="Manage"
+      />
+
+    </div>
 
   </div>
 
