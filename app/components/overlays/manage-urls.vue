@@ -18,9 +18,10 @@
 
         <UButton
           v-if="!table?.tableApi?.getSelectedRowModel().rows.length"
-          label="Add URL"
+          label="Add URLs"
           color="neutral"
           size="sm"
+          @click="addUrlsModal.open()"
         />
 
         <template v-if="table?.tableApi?.getSelectedRowModel().rows.length">
@@ -94,13 +95,14 @@
 </template>
 
 <script setup lang="ts">
-import { UButton, UIcon } from '#components'
-
-
+import { LazyOverlaysAddUrls, UButton, UIcon } from '#components'
 import type { TableColumn, TableRow } from '@nuxt/ui'
 import { getPaginationRowModel } from '@tanstack/vue-table'
 
 const emit = defineEmits<{ close: [boolean] }>()
+
+const overlay = useOverlay()
+const addUrlsModal = overlay.create(LazyOverlaysAddUrls)
 
 const urls = ref([
   'https://example.com',

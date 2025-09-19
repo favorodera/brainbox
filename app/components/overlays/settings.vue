@@ -5,7 +5,7 @@
     title="Settings"
     description="Manage your profile, security, and data settings."
     :ui="{
-      content: 'max-w-2xl',
+      content: 'max-w-3xl',
       body: 'p-0 sm:p-0 flex flex-col gap-1 sm:flex-row justify-between min-h-96',
       header: 'p-3 sm:p-3',
     }"
