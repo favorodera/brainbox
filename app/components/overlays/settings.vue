@@ -7,13 +7,14 @@
     :ui="{
       content: 'max-w-2xl',
       body: 'p-0 sm:p-0 flex flex-col gap-1 sm:flex-row justify-between min-h-96',
+      header: 'p-3 sm:p-3',
     }"
     :dismissible="false"
   >
 
     <template #body>
 
-      <div class="flex flex-wrap gap-2 p-2 sm:flex-col">
+      <div class="flex flex-wrap gap-2 p-3 sm:flex-col">
 
         <UButton
           v-for="(item, index) in tabsItems"
@@ -38,7 +39,7 @@
 
       <USeparator class="min-sm:hidden" />
 
-      <div class="flex-1 p-2">
+      <div class="flex-1 p-3">
 
         <Transition
           name="page-layout-transition"
