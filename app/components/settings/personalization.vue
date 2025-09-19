@@ -18,6 +18,7 @@
         color="neutral"
         variant="link"
         label="Manage"
+        @click="manageUrlsModal.open()"
       />
 
     </div>
@@ -28,7 +29,10 @@
 </template>
 
 <script setup lang="ts">
+import { LazyOverlaysManageUrls } from '#components'
 
+const overlay = useOverlay()
+const manageUrlsModal = overlay.create(LazyOverlaysManageUrls)
 </script>
 
 <style scoped>
