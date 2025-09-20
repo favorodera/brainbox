@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
 
     const { error, data } = await client
       .from('users')
-      .select('id,name, avatar, email, urls')
+      .select('id,name, avatar, email')
       .eq('id', user.id)
       .single()
 
@@ -28,7 +28,7 @@ export default defineEventHandler(async (event) => {
         message: error.message,
       })
     }
-    
+
     return data
 
   } catch (error) {

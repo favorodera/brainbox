@@ -21,8 +21,8 @@ export default defineNuxtConfig({
     rootAttrs: {
       id: 'app',
     },
-    pageTransition: { name: 'page-layout-transition', mode: 'out-in' },
-    layoutTransition: { name: 'page-layout-transition', mode: 'out-in' },
+    pageTransition: { name: 'fade-out-in', mode: 'out-in' },
+    layoutTransition: { name: 'fade-out-in', mode: 'out-in' },
   },
   css: ['~/assets/styles/index.css'],
   compatibilityDate: '2025-07-15',

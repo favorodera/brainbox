@@ -15,7 +15,7 @@ type Schema = z.output<typeof schema>
 export default defineEventHandler<{ body: Schema }>(async (event) => {
 
   try {
-  
+
     const user = await serverSupabaseUser(event)
 
     if (!user) {
@@ -44,7 +44,7 @@ export default defineEventHandler<{ body: Schema }>(async (event) => {
     const { error } = await client.rpc('manage_user_urls', {
       p_user_id: user.id,
       p_action: 'add',
-      p_urls: [...urls],
+      p_urls: urls,
     })
 
     if (error) {
@@ -54,7 +54,7 @@ export default defineEventHandler<{ body: Schema }>(async (event) => {
         message: error.message,
       })
     }
-    
+
     return 'OK'
 
   } catch (error) {

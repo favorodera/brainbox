@@ -75,17 +75,17 @@ body {
   display: none;
 }
 
-.page-layout-transition-enter-active,
-.page-layout-transition-leave-active {
+.fade-out-in-enter-active,
+.fade-out-in-leave-active {
   transition: all 300ms ease;
 }
 
-.page-layout-transition-enter-from,
-.page-layout-transition-leave-to {
+.fade-out-in-enter-from,
+.fade-out-in-leave-to {
   opacity: 0;
 }
 
-.page-layout-transition-enter-to,
-.page-layout-transition-leave-from {
+.fade-out-in-enter-to,
+.fade-out-in-leave-from {
   opacity: 1;
 }

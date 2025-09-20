@@ -42,7 +42,7 @@
       <div class="flex-1 p-3">
 
         <Transition
-          name="page-layout-transition"
+          name="fade-out-in"
           mode="out-in"
         >
           <KeepAlive>

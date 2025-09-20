@@ -84,7 +84,8 @@
         block
         type="submit"
         form="add-urls-form"
-        loading-auto
+        :loading="status === 'pending'"
+        :disabled="status === 'pending'"
       />
     </template>
 
@@ -97,6 +98,8 @@ import type { FormSubmitEvent } from '@nuxt/ui'
 import z from 'zod'
 
 const emit = defineEmits<{ close: [boolean] }>()
+
+const { refresh } = useUrlsStore('urls')
 
 const toast = useToast()
 
@@ -115,7 +118,7 @@ const state = reactive<Partial<Schema>>({
   urls: [{ name: '', url: '' }],
 })
 
-const { execute } = useRequest('/api/urls', {
+const { execute, status } = useRequest('/api/urls', {
   $fetch: {
     method: 'POST',
   },
@@ -126,6 +129,10 @@ const { execute } = useRequest('/api/urls', {
         color: 'success',
         icon: 'lucide:check',
       })
+
+      emit('close', false)
+
+      refresh()
     },
     onError(error) {
       toast.add({
@@ -147,6 +154,7 @@ async function handleSubmit(event: FormSubmitEvent<Schema>) {
       },
     },
   })
+
 }
 
 const handleUrls = {
