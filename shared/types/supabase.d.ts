@@ -46,7 +46,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      manage_user_urls: {
+        Args: {
+          p_action: string
+          p_match_key?: string
+          p_match_value?: string
+          p_urls?: Json
+          p_user_id: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never

@@ -45,5 +45,26 @@ useHead({
     { rel: 'icon', href: '/logo.svg' },
   ],
 })
+
+const user = useSupabaseUser()
+
+watch([user, () => useDocumentVisibility()], ([user, status]) => {
+
+  if (!user) return
+
+  const { user: data, realtimeOn, realtimeOff } = useUserStore()
+
+  if (status.value === 'visible') {
+
+    data.refresh()
+    realtimeOn()
+
+  } else {
+
+    realtimeOff()
+  }
+
+
+}, { immediate: true })
 </script>
 

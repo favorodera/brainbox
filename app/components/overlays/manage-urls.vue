@@ -12,79 +12,84 @@
   >
 
     <template #body>
-  
 
-      <div class="flex items-center justify-end gap-2">
+      <template v-if="status === 'fetching'" />
 
-        <UButton
-          v-if="!table?.tableApi?.getSelectedRowModel().rows.length"
-          label="Add URLs"
-          color="neutral"
-          size="sm"
-          @click="addUrlsModal.open()"
-        />
+      <template v-if="data">
+        <div class="flex items-center justify-end gap-2">
 
-        <template v-if="table?.tableApi?.getSelectedRowModel().rows.length">
           <UButton
-            label="Clear selection"
+            v-if="!table?.tableApi?.getSelectedRowModel().rows.length"
+            label="Add URLs"
             color="neutral"
             size="sm"
-            variant="soft"
-            icon="lucide:x"
-            @click="table?.tableApi?.resetRowSelection()"
+            @click="addUrlsModal.open()"
           />
 
-          <UButton
-            :label="`Remove (${table?.tableApi?.getSelectedRowModel().rows.length})`"
-            color="error"
-            variant="soft"
-            size="sm"
-            icon="lucide:trash-2"
-          />
-        </template>
+          <template v-if="table?.tableApi?.getSelectedRowModel().rows.length">
+            <UButton
+              label="Clear selection"
+              color="neutral"
+              size="sm"
+              variant="soft"
+              icon="lucide:x"
+              @click="table?.tableApi?.resetRowSelection()"
+            />
+
+            <UButton
+              :label="`Remove (${table?.tableApi?.getSelectedRowModel().rows.length})`"
+              color="error"
+              variant="soft"
+              size="sm"
+              icon="lucide:trash-2"
+            />
+          </template>
 
 
-      </div>
+        </div>
 
 
-      <UTable
-        ref="table"
-        v-model:pagination="pagination"
-        v-model:row-selection="rowSelection"
-        caption="URL Table"
-        class="shrink-0"
-        :data="urls"
-        :columns="columns"
-        sticky
-        :pagination-options="{
-          getPaginationRowModel: getPaginationRowModel(),
-        }"
-        :ui="{
-          root: 'border-t border-default',
-          thead: 'hidden',
-          th: 'hidden',
-          td: 'border-b border-default cursor-pointer',
-        }"
-        @select="onSelect"
-      />
-
-      <div class="flex flex-col-reverse items-center justify-between gap-3 sm:flex-row">
-        <p class="text-sm text-muted">
-          Total URLs: {{ urls.length }}
-        </p>
-
-        <UPagination
-          :sibling-count="1"
-          size="xs"
-          color="neutral"
-          variant="link"
-          active-variant="soft"
-          :default-page="(table?.tableApi?.getState().pagination.pageIndex || 0) + 1"
-          :items-per-page="table?.tableApi?.getState().pagination.pageSize"
-          :total="table?.tableApi?.getFilteredRowModel().rows.length"
-          @update:page="(page: number) => table?.tableApi?.setPageIndex(page - 1)"
+        <UTable
+          ref="table"
+          v-model:pagination="pagination"
+          v-model:row-selection="rowSelection"
+          caption="URL Table"
+          class="shrink-0"
+          :data="data.urls"
+          :columns="columns"
+          :loading="status === 'refreshing'"
+          sticky
+          :pagination-options="{
+            getPaginationRowModel: getPaginationRowModel(),
+          }"
+          :ui="{
+            root: 'border-t border-default',
+            thead: 'hidden',
+            th: 'hidden',
+            td: 'border-b border-default cursor-pointer',
+          }"
+          @select="onSelect"
         />
-      </div>
+
+        <div class="flex flex-col-reverse items-center justify-between gap-3 sm:flex-row">
+          <p class="text-sm text-muted">
+            Total URLs: {{ data.urls.length }}
+          </p>
+
+          <UPagination
+            :sibling-count="1"
+            size="xs"
+            color="neutral"
+            variant="link"
+            active-variant="soft"
+            :default-page="(table?.tableApi?.getState().pagination.pageIndex || 0) + 1"
+            :items-per-page="table?.tableApi?.getState().pagination.pageSize"
+            :total="table?.tableApi?.getFilteredRowModel().rows.length"
+            @update:page="(page: number) => table?.tableApi?.setPageIndex(page - 1)"
+          />
+        </div>
+
+      </template>
   
 
     </template>
@@ -99,35 +104,12 @@ import { LazyOverlaysAddUrls, UButton, UIcon } from '#components'
 import type { TableColumn, TableRow } from '@nuxt/ui'
 import { getPaginationRowModel } from '@tanstack/vue-table'
 
+const { data, status } = useUserStore('user')
+
 const emit = defineEmits<{ close: [boolean] }>()
 
 const overlay = useOverlay()
 const addUrlsModal = overlay.create(LazyOverlaysAddUrls)
-
-const urls = ref([
-  'https://example.com',
-  'https://news.ycombinator.com',
-  'https://vuejs.org',
-  'https://github.com',
-  'https://docs.nuxt.com',
-  'https://openai.com',
-  'https://google.com',
-  'https://twitter.com',
-  'https://facebook.com',
-  'https://reddit.com',
-  'https://stackoverflow.com',
-  'https://github.com/nuxt',
-  'https://vitejs.dev',
-  'https://developer.mozilla.org',
-  'https://npmjs.com',
-  'https://yarnpkg.com',
-  'https://pnpm.io',
-  'https://nextjs.org',
-  'https://astro.build',
-  'https://vercel.com',
-  'https://netlify.com',
-  'https://supabase.com',
-])
 
 const table = useTemplateRef('table')
 
@@ -138,11 +120,11 @@ const pagination = ref({
 
 const rowSelection = ref<Record<string, boolean>>({})
 
-function onSelect(row: TableRow<string>, _event?: Event) {
+function onSelect(row: TableRow<{ name: string, url: string }>, _event?: Event) {
   row.toggleSelected()
 }
 
-const columns = ref<TableColumn<string>[]>([
+const columns = ref<TableColumn<{ name: string, url: string }>[]>([
   {
     accessorKey: 'url',
     header: '',
@@ -151,7 +133,7 @@ const columns = ref<TableColumn<string>[]>([
         class: 'flex items-center gap-2 justify-between',
       },
       [
-        h('span', {}, row.original),
+        h('span', {}, row.original.url),
         h(UIcon,
           {
             name: 'lucide:check-circle-2',

@@ -34,9 +34,43 @@ export const useUserStore = createStore('user-store', ({ state, request }) => {
           event: '*',
           schema: 'public',
           table: 'users',
+          filter: 'column_name=urls',
         },
-        () => user.refresh(),
-      )
+        (payload) => {
+
+          if (!user.data.value) return
+
+          switch (payload.eventType) {
+            case 'INSERT':{
+
+              if (payload.new.id === user.data.value.id) {
+                user.data.value.urls = { ...user.data.value.urls, ...payload.new }
+              }
+
+              break
+            }
+
+            case 'UPDATE':{
+
+              if (payload.new.id === user.data.value.id) {
+                user.data.value.urls = { ...user.data.value.urls, ...payload.new }
+              }
+
+              break
+            }
+
+            case 'DELETE':{
+              if (payload.old.id === user.data.value.id) {
+                user.refresh()
+              }
+              break
+            }
+              
+          
+          }
+
+        },
+      ).subscribe()
   }
 
   return {

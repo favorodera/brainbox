@@ -17,6 +17,8 @@
         :schema
         :state
         class="space-y-2"
+        loading-auto
+        @submit="handleSubmit"
       >
 
         <div
@@ -82,6 +84,7 @@
         block
         type="submit"
         form="add-urls-form"
+        loading-auto
       />
     </template>
 
@@ -90,11 +93,12 @@
 </template>
 
 <script setup lang="ts">
+import type { FormSubmitEvent } from '@nuxt/ui'
 import z from 'zod'
 
 const emit = defineEmits<{ close: [boolean] }>()
 
-// const toast = useToast()
+const toast = useToast()
 
 const schema = z.object({
   urls: z.array(
@@ -110,6 +114,40 @@ type Schema = z.output<typeof schema>
 const state = reactive<Partial<Schema>>({
   urls: [{ name: '', url: '' }],
 })
+
+const { execute } = useRequest('/api/urls', {
+  $fetch: {
+    method: 'POST',
+  },
+  hooks: {
+    onSuccess() {
+      toast.add({
+        title: 'URLs saved successfully',
+        color: 'success',
+        icon: 'lucide:check',
+      })
+    },
+    onError(error) {
+      toast.add({
+        title: error?.data?.message || 'Failed to save URLs',
+        color: 'error',
+        icon: 'lucide:x',
+      })
+    },
+  },
+  
+}, false)
+
+async function handleSubmit(event: FormSubmitEvent<Schema>) {
+
+  await execute({
+    $fetch: {
+      body: {
+        urls: [...event.data.urls],
+      },
+    },
+  })
+}
 
 const handleUrls = {
   add() {
