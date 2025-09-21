@@ -67,7 +67,7 @@
         block
         type="submit"
         form="edit-urls-form"
-        :disabled="status === 'pending' "
+        :disabled="status === 'pending' || !anyChangeOccurred"
       />
     </template>
   </UModal>
@@ -97,20 +97,16 @@ const schema = z.object({
 
 type Schema = z.output<typeof schema>
 
-const state = reactive<Schema>({
-  urls: [...props.urls],
+const state = ref<Schema>({
+  urls: props.urls.map(url => ({ ...url })),
 })
 
-// const anyChangeOccurred = computed(() => {
-//   if (state.urls.length !== props.urls.length) return true
-  
-//   return state.urls.some((url, index) => {
-//     const originalUrl = props.urls[index]
-//     return !originalUrl
-//       || url.name.trim() !== originalUrl.name.trim()
-//       || url.url.trim() !== originalUrl.url.trim()
-//   })
-// })
+const anyChangeOccurred = computed(() => {
+  return props.urls.some((item, index) => {
+    const current = state.value.urls[index]
+    return item.name !== current?.name || item.url !== current?.url
+  })
+})
 
 
 const { execute, status } = useRequest('/api/urls', {

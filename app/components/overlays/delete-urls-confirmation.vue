@@ -4,7 +4,7 @@
     title="Delete URLs"
     description="Are you sure you want to delete the following URLs? This action cannot be undone."
     :ui="{
-      content: 'max-w-xl',
+      content: 'max-w-2xl',
       footer: 'justify-between',
     }"
     :dismissible="false"

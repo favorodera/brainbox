@@ -66,7 +66,7 @@
                 ]"
               >
                 <UButton
-                  :label="`${selectedRows.length} URLs Selected`"
+                  label="Actions"
                   variant="soft"
                   class="min-sm:hidden"
                   size="sm"
@@ -100,7 +100,6 @@
             sticky
             :ui="{
               thead: 'hidden',
-              th: 'hidden',
               td: 'cursor-pointer p-2',
             }"
             @select="onSelect"
@@ -203,27 +202,35 @@ const selectedRows = computed((): { name: string, url: string }[] => {
   return tableApi.getSelectedRowModel().rows.map(row => row.original)
 })
 
+
 const columns = ref<TableColumn<{ name: string, url: string }>[]>([
   {
+    accessorKey: 'name',
+    header: 'Name',
+    enableGlobalFilter: true,
+    meta: { class: { th: 'hidden', td: 'hidden' } },
+  },
+  {
     accessorKey: 'url',
+    header: 'URL',
+    enableGlobalFilter: true,
+    meta: { class: { th: 'hidden', td: 'hidden' } },
+  },
+  {
+    id: 'urlDisplay',
     header: '',
     cell: ({ row }) => h('div', {
-      class: `flex items-center gap-2 ${row.getIsSelected() ? 'text-default' : 'text-muted'}`,
+      class: `${row.getIsSelected() ? 'text-default' : 'text-muted'}`,
     }, [
-      h(UIcon, {
-        name: 'lucide:globe',
-        class: `shrink-0`,
-      }),
-      h('span', { class: `flex-1 truncate mx-2 ` }, row.original.url),
+      h('p', { class: 'truncate text-sm font-medium' }, row.original.name),
+      h('p', { class: 'truncate text-xs' }, row.original.url),
     ]),
   },
 ])
 
-watchEffect(() => {
-  if (status.value === 'refreshing') {
-    table.value?.tableApi?.resetRowSelection()
-    table.value?.tableApi?.resetGlobalFilter()
-  }
+whenever(() => status.value === 'refreshing', () => {
+  table.value?.tableApi?.resetRowSelection()
+  table.value?.tableApi?.resetGlobalFilter()
 })
 </script>
 
