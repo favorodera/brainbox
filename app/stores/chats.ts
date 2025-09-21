@@ -1,18 +1,19 @@
+import type { UIMessage } from 'ai'
+
 export const useChatsStore = createStore('chats-store', ({ request }) => {
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const chats = request<any>(({ signal }) => $fetch(
-    '/api/chats/',
+  const chat = request<{ id: string, messages: UIMessage[], title: string }, { id: string }>(({ signal, param: { id } }) => $fetch(
+    `/api/chats/${id}`,
     {
       signal,
+      cache: 'force-cache',
       method: 'GET',
       headers: useRequestHeaders(['cookie']),
     },
   ), { mode: 'manual' })
 
-
   return {
-    chats,
+    chat,
   }
 
 })

@@ -2,7 +2,7 @@ import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import { z } from 'zod'
 
 const schema = z.object({
-  prompt: z.string(),
+  id: z.string(),
 })
 
 type Schema = z.output<typeof schema>
@@ -21,29 +21,25 @@ export default defineEventHandler<{ body: Schema }>(async (event) => {
       })
     }
 
-    const validate = await readValidatedBody(event, schema.safeParse)
+    const validate = await getValidatedRouterParams(event, schema.safeParse)
 
     if (validate.error) {
       const issue = validate.error.issues[0]
       throw createError({
         statusCode: 400,
         statusMessage: 'BAD_REQUEST',
-        message: issue ? `${issue.path}: ${issue.message}` : 'Invalid body parameters',
+        message: issue ? `${issue.path}: ${issue.message}` : 'Invalid query parameters',
       })
     }
 
-    const { prompt } = validate.data
+    const { id } = validate.data
 
     const client = await serverSupabaseClient<Database>(event)
 
     const { error, data } = await client
       .from('chats')
-      .insert({ messages: [{
-        role: 'user',
-        parts: [{ type: 'text', text: prompt }],
-      }],
-      })
-      .select('id')
+      .select('id, messages, title')
+      .match({ id, owner_id: user.id })
       .single()
 
     if (error) {
@@ -54,7 +50,7 @@ export default defineEventHandler<{ body: Schema }>(async (event) => {
       })
     }
 
-    return data.id
+    return data
 
   } catch (error) {
     return getError(error)

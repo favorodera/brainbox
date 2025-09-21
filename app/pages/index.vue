@@ -16,7 +16,45 @@
             How can I help you today?
           </h1>
         
-          <ChatPromptBox />
+          <UChatPrompt
+            id="new-chat-prompt"
+            v-model="prompt"
+            class="[view-transition-name:chat-prompt]"
+            variant="soft"
+            placeholder="Ask anything..."
+            name="new-chat-prompt"
+            autofocus
+            autoresize
+            :maxrows="6"
+            autocapitalize="on"
+            autocorrect
+            :ui="{
+              footer: 'justify-between gap-4',
+            }"
+            @submit="handleSubmit()"
+          >
+
+            <template #footer>
+              <USelectMenu
+                v-model="model"
+                :items="models"
+                :icon="selectedModel?.icon"
+                variant="ghost"
+                value-key="value"
+                :search-input="{
+                  placeholder: 'Search models...',
+                }"
+                class="w-min"
+                :ui="{
+                  leadingIcon: 'size-4',
+                  trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200',
+                }"
+              />
+  
+              <UChatPromptSubmit :status="status === 'pending' ? 'submitted' :'ready'" />
+            </template>
+
+          </UChatPrompt>
         </UContainer>
 
       </template>
@@ -31,17 +69,31 @@ definePageMeta({
   layout: 'chat',
 })
 
-const { data, status } = useRequest('', {
+const { model, models } = useAiModels()
+
+const selectedModel = useArrayFind(models, selected => selected.value === model.value)
+
+const prompt = ref('')
+
+const { status, execute } = useRequest<string>('/api/chats', {
   $fetch: {
     method: 'POST',
   },
   hooks: {
-    onSuccess(data) {
-      navigateTo({
-        path: 'chat-id',
-        params: { id: data.id },
+    async onSuccess(data) {
+      await navigateTo({
+        name: 'chats-id',
+        params: { id: data },
       })
     },
   },
 }, false)
+
+async function handleSubmit() {
+  await execute({
+    $fetch: {
+      body: { prompt: prompt.value },
+    },
+  })
+}
 </script>
