@@ -25,15 +25,56 @@
               size="sm"
             />
 
-            <UButton
+            <div
               v-if="selectedRows.length > 0"
-              :label="`Delete (${selectedRows.length})`"
-              color="error"
-              variant="soft"
-              size="sm"
-              icon="lucide:trash-2"
-              @click="deleteUrlsConfirmationModal.open({ urls: selectedRows })"
-            />
+              class="flex gap-2"
+            >
+
+              <UButton
+                :label="`Edit (${selectedRows.length})`"
+                size="sm"
+                variant="soft"
+                icon="lucide:edit"
+                class="max-sm:hidden"
+                @click="editUrlsModal.open({ urls: selectedRows })"
+              />
+
+              <UButton
+                :label="`Delete (${selectedRows.length})`"
+                color="error"
+                variant="soft"
+                size="sm"
+                icon="lucide:trash-2"
+                class="max-sm:hidden"
+                @click="deleteUrlsConfirmationModal.open({ urls: selectedRows })"
+              />
+
+              <UDropdownMenu
+                class="min-sm:hidden"
+                :items="[
+                  {
+                    label: `Edit ${selectedRows.length}`,
+                    icon: 'lucide:edit',
+                    onSelect: () => editUrlsModal.open({ urls: selectedRows }),
+                  },
+                  {
+                    label: `Delete ${selectedRows.length}`,
+                    icon: 'lucide:trash-2',
+                    onSelect: () => deleteUrlsConfirmationModal.open({ urls: selectedRows }),
+                    color: 'error',
+                  },
+                ]"
+              >
+                <UButton
+                  :label="`${selectedRows.length} URLs Selected`"
+                  variant="soft"
+                  class="min-sm:hidden"
+                  size="sm"
+                  trailing
+                  icon="lucide:chevron-down"
+                />
+              </UDropdownMenu>
+            </div>
 
             <UButton
               v-else
@@ -42,6 +83,8 @@
               size="sm"
               @click="addUrlsModal.open()"
             />
+
+
           </div>
 
           <UTable
@@ -51,6 +94,7 @@
             v-model:global-filter="globalFilter"
             caption="URL Table"
             class="shrink-0"
+            empty="No URLs found"
             :data="data"
             :columns="columns"
             sticky
@@ -127,7 +171,7 @@
 </template>
 
 <script setup lang="ts">
-import { LazyOverlaysAddUrls, LazyOverlaysDeleteUrlsConfirmation, UButton, UIcon } from '#components'
+import { LazyOverlaysAddUrls, LazyOverlaysDeleteUrlsConfirmation, LazyOverlaysEditUrls, UButton, UIcon } from '#components'
 import type { TableColumn, TableRow } from '@nuxt/ui'
 
 const { data, status, error, execute } = useUrlsStore('urls')
@@ -137,6 +181,7 @@ const emit = defineEmits<{ close: [boolean] }>()
 const overlay = useOverlay()
 const addUrlsModal = overlay.create(LazyOverlaysAddUrls)
 const deleteUrlsConfirmationModal = overlay.create(LazyOverlaysDeleteUrlsConfirmation)
+const editUrlsModal = overlay.create(LazyOverlaysEditUrls)
 
 const table = useTemplateRef('table')
 
@@ -148,16 +193,14 @@ const pagination = ref({
 const rowSelection = ref<Record<string, boolean>>({})
 const globalFilter = ref('')
 
-// Function to handle row selection
 function onSelect(row: TableRow<{ name: string, url: string }>, _event?: Event) {
   row.toggleSelected()
 }
 
-// Fixed selected rows computation using table API
 const selectedRows = computed((): { name: string, url: string }[] => {
   const tableApi = table.value?.tableApi
   if (!tableApi) return []
-  return tableApi.getSelectedRowModel().rows.map((row: { original: { name: string, url: string } }) => row.original)
+  return tableApi.getSelectedRowModel().rows.map(row => row.original)
 })
 
 const columns = ref<TableColumn<{ name: string, url: string }>[]>([
@@ -165,15 +208,22 @@ const columns = ref<TableColumn<{ name: string, url: string }>[]>([
     accessorKey: 'url',
     header: '',
     cell: ({ row }) => h('div', {
-      class: 'flex items-center gap-2 justify-between',
+      class: `flex items-center gap-2 ${row.getIsSelected() ? 'text-default' : 'text-muted'}`,
     }, [
-      h('span', {}, row.original.url),
       h(UIcon, {
-        name: 'lucide:check-circle-2',
-        class: `text-default shrink-0 transition-opacity ${row.getIsSelected() ? 'opacity-100' : 'opacity-0'}`,
+        name: 'lucide:globe',
+        class: `shrink-0`,
       }),
+      h('span', { class: `flex-1 truncate mx-2 ` }, row.original.url),
     ]),
   },
 ])
+
+watchEffect(() => {
+  if (status.value === 'refreshing') {
+    table.value?.tableApi?.resetRowSelection()
+    table.value?.tableApi?.resetGlobalFilter()
+  }
+})
 </script>
 

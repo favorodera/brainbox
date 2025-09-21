@@ -5,7 +5,7 @@
     title="Sign Out"
     description="Are you sure you want to sign out?"
     :ui="{
-      content: 'max-w-md',
+      content: 'max-w-lg',
     }"
   >
 

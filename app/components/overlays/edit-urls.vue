@@ -1,32 +1,27 @@
 <template>
-
   <UModal
     :close="{ onClick: () => emit('close', false) }"
-    title="Add New URLs"
-    description="Add new URLs for personalization."
+    title="Edit URLs"
+    description="Edit the URLs below. Make your changes and save."
     :ui="{
       content: 'max-w-2xl',
     }"
     :dismissible="false"
   >
-
     <template #body>
-
       <UForm
-        id="add-urls-form"
-        :schema
-        :state
+        id="edit-urls-form"
+        :schema="schema"
+        :state="state"
         class="space-y-2"
         loading-auto
         @submit="handleSubmit"
       >
-
         <div
           v-for="(url, index) in state.urls"
           :key="index"
           class="flex items-start gap-2"
         >
-
           <UFormField
             :name="`urls.${index}.name`"
             class="flex-1"
@@ -52,55 +47,43 @@
               type="url"
             />
           </UFormField>
-
-          <UButton
-            variant="soft"
-            color="neutral"
-            icon="lucide:trash"
-            size="sm"
-            :disabled="state.urls?.length === 1"
-            @click="handleUrls.remove(index)"
-          />
-
-
         </div>
-
-        <UButton
-          variant="soft"
-          color="neutral"
-          icon="lucide:plus"
-          size="sm"
-          square
-          label="Add URL"
-          @click="handleUrls.add()"
-        />
-
       </UForm>
     </template>
 
     <template #footer>
       <UButton
+        label="Cancel"
+        color="neutral"
+        variant="soft"
+        block
+        @click="emit('close', false)"
+      />
+      <UButton
         label="Save URLs"
+        color="primary"
+        :loading="status === 'pending'"
+        loading-auto
         block
         type="submit"
-        form="add-urls-form"
-        :loading="status === 'pending'"
-        :disabled="status === 'pending'"
+        form="edit-urls-form"
+        :disabled="status === 'pending' "
       />
     </template>
-
   </UModal>
-  
 </template>
 
 <script setup lang="ts">
 import type { FormSubmitEvent } from '@nuxt/ui'
 import z from 'zod'
 
+const props = defineProps<{
+  urls: { name: string, url: string }[]
+}>()
+
 const emit = defineEmits<{ close: [boolean] }>()
 
 const { refresh } = useUrlsStore('urls')
-
 const toast = useToast()
 
 const schema = z.object({
@@ -114,18 +97,30 @@ const schema = z.object({
 
 type Schema = z.output<typeof schema>
 
-const state = reactive<Partial<Schema>>({
-  urls: [{ name: '', url: '' }],
+const state = reactive<Schema>({
+  urls: [...props.urls],
 })
+
+// const anyChangeOccurred = computed(() => {
+//   if (state.urls.length !== props.urls.length) return true
+  
+//   return state.urls.some((url, index) => {
+//     const originalUrl = props.urls[index]
+//     return !originalUrl
+//       || url.name.trim() !== originalUrl.name.trim()
+//       || url.url.trim() !== originalUrl.url.trim()
+//   })
+// })
+
 
 const { execute, status } = useRequest('/api/urls', {
   $fetch: {
-    method: 'POST',
+    method: 'PATCH',
   },
   hooks: {
     onSuccess() {
       toast.add({
-        title: 'URLs saved successfully',
+        title: 'URLs updated successfully',
         color: 'success',
         icon: 'lucide:check',
       })
@@ -136,17 +131,15 @@ const { execute, status } = useRequest('/api/urls', {
     },
     onError(error) {
       toast.add({
-        title: error?.data?.message || 'Failed to save URLs',
+        title: error?.data?.message || 'Failed to update URLs',
         color: 'error',
         icon: 'lucide:x',
       })
     },
   },
-  
 }, false)
 
 async function handleSubmit(event: FormSubmitEvent<Schema>) {
-
   await execute({
     $fetch: {
       body: {
@@ -154,26 +147,8 @@ async function handleSubmit(event: FormSubmitEvent<Schema>) {
       },
     },
   })
-
 }
-
-const handleUrls = {
-  add() {
-    if (!state.urls) {
-      state.urls = [{ name: '', url: '' }]
-    }
-    state.urls.push({ name: '', url: '' })
-  },
-
-  remove(index: number) {
-    if (state.urls && state.urls.length > 1) {
-      state.urls.splice(index, 1)
-    }
-  },
-}
-
 </script>
 
 <style scoped>
-
 </style>
