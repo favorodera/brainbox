@@ -26,13 +26,13 @@
 
       <template #default="{ collapsed }">
 
-        <div class="flex flex-col gap-1.5">
+        <div class="flex flex-col gap-4">
 
           <UButton
             icon="lucide:edit"
             :label="collapsed ? undefined : 'New Chat'"
-            variant="ghost"
             class="w-full"
+            to="/"
           />
 
           <UButton
@@ -87,6 +87,7 @@
           {
             label: 'New chat',
             icon: 'lucide:square-pen',
+            to: '/',
           },
         ],
       }]"

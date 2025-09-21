@@ -6,6 +6,7 @@ export default defineNuxtConfig({
   modules: [
     '@vaxee/nuxt',
     '@nuxt/ui',
+    '@nuxtjs/mdc',
     '@vueuse/nuxt',
     '@nuxtjs/seo',
     '@nuxt/image',
@@ -25,8 +26,25 @@ export default defineNuxtConfig({
     layoutTransition: { name: 'fade-out-in', mode: 'out-in' },
   },
   css: ['~/assets/styles/index.css'],
+  runtimeConfig: {
+    vercelAIGatewayKey: '',
+    supabaseServiceKey: '',
+    public: {
+      supabaseUrl: '',
+      supabaseKey: '',
+    },
+  },
   compatibilityDate: '2025-07-15',
   vite: {
+    $server: {
+      build: {
+        rollupOptions: {
+          output: {
+            preserveModules: true
+          }
+        }
+      }
+    },
     plugins: [
       tailwindcss(),
     ],
@@ -41,6 +59,15 @@ export default defineNuxtConfig({
     customCollections: [
       { prefix: 'custom', dir: './app/assets/icons' },
     ],
+  },
+  experimental: {
+    viewTransition: true
+  },
+  mdc: {
+    highlight: {
+      // noApiRoute: true
+      shikiEngine: 'javascript'
+    }
   },
   supabase: {
     url: process.env.NUXT_PUBLIC_SUPABASE_URL,

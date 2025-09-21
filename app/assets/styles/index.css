@@ -9,7 +9,7 @@
 
 :root {
   --ui-primary: black;
-  --ui-container: var(--container-8xl);
+  --ui-container: var(--container-3xl);
 }
 
 

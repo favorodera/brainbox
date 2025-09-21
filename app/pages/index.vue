@@ -2,95 +2,24 @@
 
   <div class="flex w-full">
     <UDashboardPanel
-      :ui="{
-        body: 'items-center justify-center',
-      }"
+      id="home"
+      :ui="{ body: 'p-0 sm:p-0' }"
     >
-
       <template #header>
-        <UDashboardNavbar
-          class="border-none"
-          :toggle="!!user"
-        >
-
-          <template #left>
-
-            <Logo
-              v-if="!user"
-            />
-
-          </template>
-
-          <template #right>
-
-            <UButton
-              v-if="user"
-              color="neutral"
-              variant="ghost"
-              icon="lucide-plus"
-              to="/"
-              class="lg:hidden"
-            />
-
-            <template v-else>
-              <UButton
-                label="Log in"
-                to="/auth"
-              />
-
-              <UButton
-                label="Sign up"
-                color="neutral"
-                variant="soft"
-                to="/auth"
-              />
-
-              <UDropdownMenu
-                :items="[
-                  { label: 'Plans and Pricing', to: '', target: '_blank' },
-                  { type: 'separator' },
-                  { label: 'Documentation', to: '', target: '_blank' },
-                  { label: 'Privacy Policy', to: '', target: '_blank' },
-                ]"
-              >
-                <UButton
-                  color="neutral"
-                  variant="soft"
-                  icon="lucide:circle-question-mark"
-                />
-              </UDropdownMenu>
-            </template>
-            
-          </template>
-
-        </UDashboardNavbar>
+        <Navbar />
       </template>
 
       <template #body>
 
-        <UPageCard
-          variant="naked"
-          title="How can I help you today?"
-          :ui="{ root: 'w-full max-w-3xl', title: 'text-3xl sm:text-4xl' }"
-        >
-          <UChatPrompt
-            id="chat-prompt"
-            class="[view-transition-name:chat-prompt]"
-            variant="subtle"
-            placeholder="Ask anything..."
-            name="chat-prompt"
-            autofocus
-            autoresize
-            autocapitalize
-            autocorrect
-          >
-            <UChatPromptSubmit color="neutral" />
-
-          </UChatPrompt>
-        </UPageCard>
+        <UContainer class="flex flex-1 flex-col justify-center gap-4 py-8 sm:gap-6">
+          <h1 class="text-3xl font-bold text-highlighted sm:text-4xl">
+            How can I help you today?
+          </h1>
+        
+          <ChatPromptBox />
+        </UContainer>
 
       </template>
-
 
     </UDashboardPanel>
   </div>
@@ -101,5 +30,18 @@
 definePageMeta({
   layout: 'chat',
 })
-const user = useSupabaseUser()
+
+const { data, status } = useRequest('', {
+  $fetch: {
+    method: 'POST',
+  },
+  hooks: {
+    onSuccess(data) {
+      navigateTo({
+        path: 'chat-id',
+        params: { id: data.id },
+      })
+    },
+  },
+}, false)
 </script>
