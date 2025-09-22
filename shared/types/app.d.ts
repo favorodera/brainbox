@@ -1,6 +1,6 @@
 declare module '#app' {
   interface NuxtError {
-    data: {
+    data?: {
       statusCode: number
       statusMessage: string
       message: string
@@ -10,7 +10,10 @@ declare module '#app' {
 
 declare global {
   interface Error {
-    data: {
+    statusCode?: number
+    statusMessage?: string
+    message?: string
+    data?: {
       statusCode: number
       statusMessage: string
       message: string

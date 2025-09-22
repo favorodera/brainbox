@@ -1,9 +1,4 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
-import { z } from 'zod'
-
-const schema = z.object({
-  prompt: z.string(),
-})
 
 export default defineEventHandler(async (event) => {
 
@@ -19,28 +14,11 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    const validate = await readValidatedBody(event, schema.safeParse)
-
-    if (validate.error) {
-      const issue = validate.error.issues[0]
-      throw createError({
-        statusCode: 400,
-        statusMessage: 'BAD_REQUEST',
-        message: issue ? `${issue.path}: ${issue.message}` : 'Invalid body parameters',
-      })
-    }
-
-    const { prompt } = validate.data
-
     const client = await serverSupabaseClient<Database>(event)
 
     const { error, data } = await client
       .from('chats')
-      .insert({ messages: [{
-        id: 'init',
-        role: 'user',
-        parts: [{ type: 'text', text: prompt }],
-      }],
+      .insert({ messages: [],
       })
       .select('id')
       .single()

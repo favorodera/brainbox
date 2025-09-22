@@ -18,75 +18,89 @@
             should-auto-scroll
             :messages="chat.messages"
             :status="chat.status"
-            :assistant="{ actions: [{ label: 'Copy', icon: copied ? 'lucide:copy-check' : 'lucide:copy', onClick: handleCopy }] }"
+            :assistant="{
+              actions: [
+                {
+                  label: 'Copy', icon: copied ? 'lucide:copy-check' : 'lucide:copy', onClick: handleCopy,
+                },
+              ],
+            }"
             class="pb-4 sm:pb-6 lg:pt-(--ui-header-height)"
+            :ui="{
+              indicator: '',
+            }"
             :spacing-offset="160"
           >
+            <!-- TODO: Check indicator -->
+            <!-- <template #indicator>
+              <UButton
+                class="px-0"
+                color="neutral"
+                variant="link"
+                loading
+                loading-icon="lucide:loader"
+                :ui="{ label: 'animate-pulse text-muted' }"
+                label="Thinking..."
+              />
+            </template> -->
+
             <template #content="{ message }">
-              <div class="space-y-4">
-                <template
-                  v-for="(part, index) in message.parts"
-                  :key="`${part.type}-${index}-${message.id}`"
-                >
-                  <UButton
-                    v-if="part.type === 'reasoning' && part.state !== 'done'"
-                    label="Thinking..."
-                    variant="link"
-                    color="neutral"
-                    class="p-0"
-                    loading
-                  />
-                </template>
-                <MDCCached
-                  :value="getTextFromMessage(message)"
-                  :cache-key="message.id"
-                  unwrap="p"
-                  :components="components"
-                  :parser-options="{ highlight: false }"
-                />
-              </div>
+
+              <MDCCached
+                :value="getTextFromMessage(message)"
+                :cache-key="message.id"
+                unwrap="p"
+                :components="components"
+                :parser-options="{ highlight: false }"
+              />
+
             </template>
           </UChatMessages>
 
+          <div class="sticky bottom-0 z-10 rounded-b-none bg-default pb-8 [view-transition-name:chat-prompt]">
+            <UChatPrompt
+              id="chat-prompt"
+              v-model="prompt"
+              variant="soft"
+              placeholder="Ask anything..."
+              autofocus
+              autoresize
+              :maxrows="6"
+              :ui="{
+                footer: 'justify-between gap-4',
+              }"
+              @submit="handleSubmit()"
+            >
 
-          <UChatPrompt
-            id="chat-prompt"
-            v-model="prompt"
-            class="sticky bottom-0 z-10 rounded-b-none [view-transition-name:chat-prompt]"
-            variant="soft"
-            placeholder="Ask anything..."
-            autofocus
-            autoresize
-            :maxrows="6"
-            autocapitalize="on"
-            autocorrect
-            :ui="{
-              footer: 'justify-between gap-4',
-            }"
-            @submit="handleSubmit()"
-          >
-
-            <template #footer>
-              <USelectMenu
-                v-model="model"
-                :items="models"
-                :icon="selectedModel?.icon"
-                variant="ghost"
-                value-key="value"
-                :search-input="{
-                  placeholder: 'Search models...',
-                }"
-                class="w-min"
-                :ui="{
-                  leadingIcon: 'size-4',
-                  trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200',
-                }"
-              />
+              <template #footer>
+                <USelectMenu
+                  v-model="model"
+                  :items="models"
+                  :icon="selectedModel?.icon"
+                  variant="ghost"
+                  value-key="value"
+                  :search-input="{
+                    placeholder: 'Search models...',
+                  }"
+                  class="w-min"
+                  :ui="{
+                    leadingIcon: 'size-4',
+                    trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200',
+                  }"
+                />
   
-              <UChatPromptSubmit />
-            </template>
+                <UChatPromptSubmit
+                  :disabled="prompt.trim() === ''"
+                  :status="chat.status"
+                  icon="lucide:send"
+                  @stop="chat.stop"
+                  @reload="chat.regenerate"
+                />
+              </template>
 
-          </UChatPrompt>
+            </UChatPrompt>
+          </div>
+
         </UContainer>
       </template>
 
@@ -96,29 +110,27 @@
 </template>
 
 <script setup lang="ts">
-import { ChatStream } from '#components'
-import type { DefineComponent } from 'vue'
 import { getTextFromMessage } from '@nuxt/ui/utils/ai'
 import { Chat } from '@ai-sdk/vue'
 import { DefaultChatTransport, type UIMessage } from 'ai'
+import { ProseStreamPre } from '#components'
+import type { DefineComponent } from 'vue'
 
 definePageMeta({
   layout: 'chat',
 })
 
+const components = {
+  pre: ProseStreamPre as unknown as DefineComponent,
+}
+
 const route = useRoute()
 
 const { data, execute } = useChatsStore('chat')
-await execute({ id: route.params.id as string })
-
-
-const components = {
-  pre: ChatStream as unknown as DefineComponent,
-}
+await execute(route.params.id as string)
 
 const { model, models } = useAiModels()
 const selectedModel = useArrayFind(models, selected => selected.value === model.value)
-
 
 const toast = useToast()
 
@@ -131,11 +143,16 @@ function handleCopy(event: MouseEvent, message: UIMessage) {
   copy(getTextFromMessage(message))
 }
 
-const prompt = ref('')
+const prompt = useChatsStore('prompt')
 
 if (!data.value) {
-  throw createError({ statusCode: 404, statusMessage: 'Chat not found', fatal: true })
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'Chat not found',
+    fatal: true,
+  })
 }
+
 
 const chat = new Chat({
   id: data.value.id,
@@ -146,9 +163,6 @@ const chat = new Chat({
       model: model.value,
     },
   }),
-  onFinish({ messages }) {
-    console.log(messages)
-  },
   onError(error) {
     toast.add({
       title: error?.data?.message || 'An error occurred',
@@ -167,11 +181,12 @@ function handleSubmit() {
 }
 
 onMounted(() => {
-  if (data.value?.messages.length === 1) {
-    chat.regenerate()
-  }
+  if (prompt.value !== '') handleSubmit()
 })
 
+onBeforeUnmount(() => {
+  prompt.value = ''
+})
 
 </script>
 

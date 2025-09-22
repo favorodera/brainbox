@@ -25,12 +25,10 @@
             autofocus
             autoresize
             :maxrows="6"
-            autocapitalize="on"
-            autocorrect
             :ui="{
               footer: 'justify-between gap-4',
             }"
-            @submit="handleSubmit()"
+            @submit="execute()"
           >
 
             <template #footer>
@@ -50,7 +48,12 @@
                 }"
               />
   
-              <UChatPromptSubmit :status="status === 'pending' ? 'submitted' :'ready'" />
+              <UButton
+                type="submit"
+                icon="lucide:send"
+                :loading="status === 'pending'"
+                :disabled="status === 'pending' || prompt.trim() === ''"
+              />
             </template>
 
           </UChatPrompt>
@@ -72,9 +75,9 @@ const { model, models } = useAiModels()
 
 const selectedModel = useArrayFind(models, selected => selected.value === model.value)
 
-const prompt = ref('')
+const prompt = useChatsStore('prompt')
 
-const { status, execute } = useRequest<string>('/api/chats', {
+const { status, execute } = useRequest<string>('/api/chats/init', {
   $fetch: {
     method: 'POST',
   },
@@ -87,12 +90,4 @@ const { status, execute } = useRequest<string>('/api/chats', {
     },
   },
 }, false)
-
-async function handleSubmit() {
-  await execute({
-    $fetch: {
-      body: { prompt: prompt.value },
-    },
-  })
-}
 </script>

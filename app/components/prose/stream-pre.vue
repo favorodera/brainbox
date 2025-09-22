@@ -15,15 +15,18 @@ import { ShikiCachedRenderer } from 'shiki-stream/vue'
 
 const colorMode = useColorMode()
 const highlighter = await useHighlighter()
+
 const props = defineProps<{
   code: string
   language: string
   class?: string
   meta?: string
 }>()
+
 const trimmedCode = computed(() => {
   return props.code.trim().replace(/`+$/, '')
 })
+
 const lang = computed(() => {
   switch (props.language) {
     case 'vue':
@@ -38,6 +41,7 @@ const lang = computed(() => {
       return props.language
   }
 })
+
 const key = computed(() => {
   return `${lang.value}-${colorMode.value}`
 })

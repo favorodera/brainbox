@@ -75,7 +75,7 @@ export default defineLazyEventHandler(() => {
 
       const { error, data } = await client
         .from('chats')
-        .select('title')
+        .select('id')
         .match({ id, owner_id: user.id })
         .single()
 
@@ -92,67 +92,19 @@ export default defineLazyEventHandler(() => {
           statusCode: 404,
           statusMessage: 'NOT_FOUND',
           message: 'Chat not found',
+          fatal: true,
         })
       }
 
       const modelRefined = google(model.split('/')[1])
 
-
-      if (!data.title) {
-        const { text } = await generateText({
-          model: google('gemini-2.5-pro'),
-          system: `You are a title generator for a chat:
-              - Generate a short title based on the first user's message
-              - The title should be less than 30 characters long
-              - The title should be a summary of the user's message
-              - Do not use quotes (' or ") or colons (:) or any other punctuation
-              - Do not use markdown, just plain text`,
-          prompt: JSON.stringify(messages[0]),
-        })
-
-        setHeader(event, 'X-Chat-Title', text.replace(/:/g, '').split('\n')[0])
-
-        client
-          .from('chats')
-          .update({
-            title: text,
-          })
-          .match({ id, owner_id: user.id })
-      }
-
-      const lastMessage = messages[messages.length - 1]
-      if (lastMessage?.role === 'user' && messages.length > 1) {
-        await client
-          .from('chats')
-          .update({ messages: JSON.parse(JSON.stringify([{
-            role: 'user',
-            parts: lastMessage.parts,
-          }])),
-          })
-          .match({ id, owner_id: user.id })
-      }
-
-      const stream = createUIMessageStream({
-        execute: ({ writer }) => {
-          const result = streamText({
-            model: modelRefined,
-            system: 'You are a helpful assistant that can answer questions and help.',
-            messages: convertToModelMessages(messages),
-          })
-    
-          writer.merge(result.toUIMessageStream())
-        },
-        onFinish: async ({ messages }) => {
-          await client
-            .from('chats')
-            .update({ messages: JSON.parse(JSON.stringify(messages)) })
-            .match({ id, owner_id: user.id })
-        },
+      const stream = streamText({
+        model: modelRefined,
+        system: 'You are a helpful assistant that can answer questions and help.',
+        messages: convertToModelMessages(messages),
       })
   
-      return createUIMessageStreamResponse({
-        stream,
-      })
+      return stream.toUIMessageStreamResponse()
 
     } catch (error) {
       return getError(error)

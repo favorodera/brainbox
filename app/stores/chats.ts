@@ -1,9 +1,11 @@
 import type { UIMessage } from 'ai'
 
-export const useChatsStore = createStore('chats-store', ({ request }) => {
+export const useChatsStore = createStore('chats-store', ({ state, request }) => {
 
-  const chat = request<{ id: string, messages: UIMessage[], title: string }, { id: string }>(({ signal, param: { id } }) => $fetch(
-    `/api/chats/${id}`,
+  const prompt = state('')
+
+  const chat = request<{ id: string, messages: UIMessage[], title: string }, string>(({ signal, param }) => $fetch(
+    `/api/chats/${param}`,
     {
       signal,
       cache: 'force-cache',
@@ -14,6 +16,7 @@ export const useChatsStore = createStore('chats-store', ({ request }) => {
 
   return {
     chat,
+    prompt,
   }
 
 })
