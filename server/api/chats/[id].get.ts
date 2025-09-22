@@ -5,9 +5,7 @@ const schema = z.object({
   id: z.string(),
 })
 
-type Schema = z.output<typeof schema>
-
-export default defineEventHandler<{ body: Schema }>(async (event) => {
+export default defineEventHandler(async (event) => {
 
   try {
 

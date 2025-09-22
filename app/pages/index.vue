@@ -22,7 +22,6 @@
             class="[view-transition-name:chat-prompt]"
             variant="soft"
             placeholder="Ask anything..."
-            name="new-chat-prompt"
             autofocus
             autoresize
             :maxrows="6"

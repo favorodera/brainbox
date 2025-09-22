@@ -50,13 +50,11 @@
 
 
           <UChatPrompt
-            id="new-chat-prompt"
+            id="chat-prompt"
             v-model="prompt"
             class="sticky bottom-0 z-10 rounded-b-none [view-transition-name:chat-prompt]"
             variant="soft"
             placeholder="Ask anything..."
-            name="new-chat-prompt"
-            
             autofocus
             autoresize
             :maxrows="6"
@@ -145,9 +143,12 @@ const chat = new Chat({
   transport: new DefaultChatTransport({
     api: `/api/chats/${data.value.id}`,
     body: {
-      aiModel: model.value,
+      model: model.value,
     },
   }),
+  onFinish({ messages }) {
+    console.log(messages)
+  },
   onError(error) {
     toast.add({
       title: error?.data?.message || 'An error occurred',

@@ -5,9 +5,7 @@ const schema = z.object({
   prompt: z.string(),
 })
 
-type Schema = z.output<typeof schema>
-
-export default defineEventHandler<{ body: Schema }>(async (event) => {
+export default defineEventHandler(async (event) => {
 
   try {
 
@@ -39,6 +37,7 @@ export default defineEventHandler<{ body: Schema }>(async (event) => {
     const { error, data } = await client
       .from('chats')
       .insert({ messages: [{
+        id: 'init',
         role: 'user',
         parts: [{ type: 'text', text: prompt }],
       }],
