@@ -28,7 +28,13 @@
             :ui="{
               footer: 'justify-between gap-4',
             }"
-            @submit="execute()"
+            @submit="execute({
+              $fetch: {
+                body: {
+                  prompt,
+                },
+              },
+            })"
           >
 
             <template #footer>
@@ -75,9 +81,9 @@ const { model, models } = useAiModels()
 
 const selectedModel = useArrayFind(models, selected => selected.value === model.value)
 
-const prompt = useChatsStore('prompt')
+const prompt = ref('')
 
-const { status, execute } = useRequest<string>('/api/chats/init', {
+const { status, execute } = useRequest<string>('/api/chats/', {
   $fetch: {
     method: 'POST',
   },

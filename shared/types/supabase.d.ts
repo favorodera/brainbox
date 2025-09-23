@@ -78,6 +78,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      append_chat_message: {
+        Args: { p_chat_id: string, p_message: Json, p_owner_id: string }
+        Returns: undefined
+      }
       manage_user_urls: {
         Args: { p_action: string, p_urls?: Json[], p_user_id: string }
         Returns: undefined

@@ -3,8 +3,6 @@ import { convertToModelMessages, streamText } from 'ai'
 import type { UIMessage } from 'ai'
 import { z } from 'zod'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
-import type { AIModel } from '~~/shared/types/ai'
-
 
 const paramsSchema = z.object({
   id: z.string(),
@@ -94,6 +92,25 @@ export default defineLazyEventHandler(() => {
           message: 'Chat not found',
           fatal: true,
         })
+      }
+
+      const lastMessage = messages[messages.length - 1]
+
+      if (lastMessage) {
+        const { error } = await client.rpc('append_chat_message', {
+          p_chat_id: id,
+          p_owner_id: user.id,
+          p_message: JSON.parse(JSON.stringify(lastMessage)),
+        })
+    
+
+        if (error) {
+          throw createError({
+            statusCode: 500,
+            statusMessage: error.code,
+            message: error.message,
+          })
+        }
       }
 
       const modelRefined = google(model.split('/')[1])

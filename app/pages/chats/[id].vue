@@ -27,12 +27,11 @@
             }"
             class="pb-4 sm:pb-6 lg:pt-(--ui-header-height)"
             :ui="{
-              indicator: '',
+              indicator: 'h-auto block *:rounded-none *:bg-transparent [&>*:nth-child(1)]:animate-none *:size-auto [&>*:nth-child(3)]:animate-none [&>*:nth-child(4)]:animate-none',
             }"
             :spacing-offset="160"
           >
-            <!-- TODO: Check indicator -->
-            <!-- <template #indicator>
+            <template #indicator>
               <UButton
                 class="px-0"
                 color="neutral"
@@ -42,17 +41,39 @@
                 :ui="{ label: 'animate-pulse text-muted' }"
                 label="Thinking..."
               />
-            </template> -->
+            </template>
 
             <template #content="{ message }">
 
-              <MDCCached
-                :value="getTextFromMessage(message)"
-                :cache-key="message.id"
-                unwrap="p"
-                :components="components"
-                :parser-options="{ highlight: false, toc: false }"
-              />
+              <div class="space-y-4">
+
+                <MDCCached
+                  :value="getTextFromMessage(message)"
+                  :cache-key="message.id"
+                  unwrap="p"
+                  :components="components"
+                  :parser-options="{ highlight: false, toc: false }"
+                />
+
+                <template
+                  v-for="(part, index) in message.parts"
+                  :key="`${part.type}-${index}-${message.id}`"
+                >
+
+                  <UButton
+                    v-if="part.type === 'text' && part.state === 'streaming'"
+                    class="px-0"
+                    color="neutral"
+                    variant="link"
+                    loading
+                    loading-icon="lucide:loader"
+                    :ui="{ label: 'animate-pulse text-muted' }"
+                    label="Generating..."
+                  />
+
+                </template>
+
+              </div>
 
             </template>
           </UChatMessages>
@@ -90,7 +111,7 @@
                 />
   
                 <UChatPromptSubmit
-                  :disabled="prompt.trim() === ''"
+                  :disabled="prompt.trim() === '' && chat.status !== 'error'"
                   :status="chat.status"
                   icon="lucide:send"
                   @stop="chat.stop"
@@ -120,11 +141,11 @@ definePageMeta({
   layout: 'chat',
 })
 
+const route = useRoute()
+
 const components = {
   pre: ProseStreamPre as unknown as DefineComponent,
 }
-
-const route = useRoute()
 
 const { data, execute } = useChatsStore('chat')
 await execute(route.params.id as string)
@@ -143,22 +164,45 @@ function handleCopy(event: MouseEvent, message: UIMessage) {
   copy(getTextFromMessage(message))
 }
 
-const prompt = useChatsStore('prompt')
+const prompt = ref('')
+
+if (!data.value) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'Chat not found',
+    fatal: true,
+  })
+}
+
+const { execute: persist } = useRequest(`/api/chats/${data.value.id}/`, {
+  $fetch: {
+    method: 'PATCH',
+  },
+}, false)
 
 const chat = new Chat({
-  id: data.value?.id,
-  messages: data.value?.messages,
+  id: data.value.id,
+  messages: data.value.messages,
   transport: new DefaultChatTransport({
-    api: `/api/chats/${data.value?.id}`,
+    api: `/api/chats/${data.value.id}`,
     body: {
       model: model.value,
     },
   }),
   onError(error) {
     toast.add({
-      title: error?.data?.message || 'An unexpected error occurred',
+      title: error.data?.message || 'An unexpected error occurred',
       icon: 'lucide:x',
       color: 'error',
+    })
+  },
+  async onFinish({ message }) {
+    await persist({
+      $fetch: {
+        body: {
+          messages: message,
+        },
+      },
     })
   },
 })
@@ -172,11 +216,9 @@ function handleSubmit() {
 }
 
 onMounted(() => {
-  if (prompt.value !== '') handleSubmit()
-})
-
-onBeforeUnmount(() => {
-  prompt.value = ''
+  if (data.value?.messages.length === 1) {
+    chat.regenerate()
+  }
 })
 
 </script>

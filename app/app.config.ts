@@ -2,7 +2,7 @@ export default defineAppConfig({
   ui: {
     colors: {
       primary: 'black',
-      neutral: 'zinc',
+      neutral: 'neutral',
     },
     formField: {
       slots: {
