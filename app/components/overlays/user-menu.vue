@@ -51,10 +51,6 @@ const dropdownMenuItems = ref<DropdownMenuItem[][]>([
       },
     },
     {
-      label: 'Billing',
-      icon: 'lucide:credit-card',
-    },
-    {
       label: 'Settings',
       icon: 'lucide:settings',
       onSelect: () => settingsModal.open(),

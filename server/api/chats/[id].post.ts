@@ -1,5 +1,5 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
-import { convertToModelMessages, createUIMessageStream, createUIMessageStreamResponse, generateText, streamText } from 'ai'
+import { convertToModelMessages, streamText } from 'ai'
 import type { UIMessage } from 'ai'
 import { z } from 'zod'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'

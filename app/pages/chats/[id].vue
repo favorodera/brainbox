@@ -4,7 +4,7 @@
     <UDashboardPanel
       id="chat"
       class="relative"
-      :ui="{ body: 'p-0 sm:p-0' }"
+      :ui="{ body: 'p-0 sm:p-0 grid grid-cols-1' }"
     >
 
       <template #header>
@@ -12,7 +12,7 @@
       </template>
 
       <template #body>
-        <UContainer class="flex flex-1 flex-col gap-4 sm:gap-6">
+        <UContainer class="grid flex-1 grid-cols-1 gap-4 sm:gap-6">
 
           <UChatMessages
             should-auto-scroll
@@ -51,7 +51,7 @@
                 :cache-key="message.id"
                 unwrap="p"
                 :components="components"
-                :parser-options="{ highlight: false }"
+                :parser-options="{ highlight: false, toc: false }"
               />
 
             </template>
@@ -145,27 +145,18 @@ function handleCopy(event: MouseEvent, message: UIMessage) {
 
 const prompt = useChatsStore('prompt')
 
-if (!data.value) {
-  throw createError({
-    statusCode: 404,
-    statusMessage: 'Chat not found',
-    fatal: true,
-  })
-}
-
-
 const chat = new Chat({
-  id: data.value.id,
-  messages: data.value.messages,
+  id: data.value?.id,
+  messages: data.value?.messages,
   transport: new DefaultChatTransport({
-    api: `/api/chats/${data.value.id}`,
+    api: `/api/chats/${data.value?.id}`,
     body: {
       model: model.value,
     },
   }),
   onError(error) {
     toast.add({
-      title: error?.data?.message || 'An error occurred',
+      title: error?.data?.message || 'An unexpected error occurred',
       icon: 'lucide:x',
       color: 'error',
     })

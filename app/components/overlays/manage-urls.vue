@@ -142,7 +142,7 @@
             class="size-5 text-error"
           />
           <p class="line-clamp-2">
-            {{ error.data.message }}
+            {{ error?.data?.message || 'An unexpected error occured' }}
           </p>
           <UButton
             label="Retry"

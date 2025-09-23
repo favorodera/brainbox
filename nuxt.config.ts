@@ -30,6 +30,9 @@ export default defineNuxtConfig({
     highlight: {
       shikiEngine: 'javascript',
     },
+    headings: {
+      anchorLinks: false,
+    },
   },
   runtimeConfig: {
     vercelAIGatewayKey: '',
