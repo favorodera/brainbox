@@ -1,5 +1,5 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
-import { convertToModelMessages, streamText } from 'ai'
+import { convertToModelMessages, createUIMessageStream, createUIMessageStreamResponse, generateText, streamText } from 'ai'
 import type { UIMessage } from 'ai'
 import { z } from 'zod'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
@@ -73,7 +73,7 @@ export default defineLazyEventHandler(() => {
 
       const { error, data } = await client
         .from('chats')
-        .select('id')
+        .select('id, title')
         .match({ id, owner_id: user.id })
         .single()
 
@@ -94,13 +94,33 @@ export default defineLazyEventHandler(() => {
         })
       }
 
+      if (!data.title) {
+        const { text } = await generateText({
+          model: google('gemini-2.5-flash'),
+          system: `You are a title generator for a chat:
+          - Generate a short title based on the first user's message
+          - The title should be less than 30 characters long
+          - The title should be a summary of the user's message
+          - Do not use quotes (' or ") or colons (:) or any other punctuation
+          - Do not use markdown, just plain text`,
+          prompt: JSON.stringify(messages[0]),
+        })
+
+        setHeader(event, 'X-Chat-Title', text.replace(/:/g, '').split('\n')[0])
+
+        await client
+          .from('chats')
+          .update({ title: text })
+          .match({ id, owner_id: user.id })
+      }
+
       const lastMessage = messages[messages.length - 1]
 
-      if (lastMessage) {
+      if (lastMessage && lastMessage.role === 'user') {
         const { error } = await client.rpc('append_chat_message', {
           p_chat_id: id,
           p_owner_id: user.id,
-          p_message: JSON.parse(JSON.stringify(lastMessage)),
+          p_message: lastMessage as unknown as Json,
         })
     
 
@@ -115,13 +135,30 @@ export default defineLazyEventHandler(() => {
 
       const modelRefined = google(model.split('/')[1])
 
-      const stream = streamText({
-        model: modelRefined,
-        system: 'You are a helpful assistant that can answer questions and help.',
-        messages: convertToModelMessages(messages),
+      const stream = createUIMessageStream({
+        execute: ({ writer }) => {
+          const result = streamText({
+            model: modelRefined,
+            system: 'You are a helpful assistant that can answer questions and help.',
+            messages: convertToModelMessages(messages),
+          })
+    
+          writer.merge(result.toUIMessageStream())
+        },
+        onFinish: async ({ messages }) => {
+          const lastMessage = messages[messages.length - 1]
+        
+          await client.rpc('append_chat_message', {
+            p_chat_id: id,
+            p_owner_id: user.id,
+            p_message: lastMessage as unknown as Json,
+          })
+        },
       })
   
-      return stream.toUIMessageStreamResponse()
+      return createUIMessageStreamResponse({
+        stream,
+      })
 
     } catch (error) {
       return getError(error)

@@ -28,13 +28,7 @@
             :ui="{
               footer: 'justify-between gap-4',
             }"
-            @submit="execute({
-              $fetch: {
-                body: {
-                  prompt,
-                },
-              },
-            })"
+            @submit="handleSubmit()"
           >
 
             <template #footer>
@@ -77,6 +71,8 @@ definePageMeta({
   layout: 'chat',
 })
 
+const toast = useToast()
+
 const { model, models } = useAiModels()
 
 const selectedModel = useArrayFind(models, selected => selected.value === model.value)
@@ -89,11 +85,23 @@ const { status, execute } = useRequest<string>('/api/chats/', {
   },
   hooks: {
     async onSuccess(data) {
-      await navigateTo({
-        name: 'chats-id',
-        params: { id: data },
+      await navigateTo(`/chats/${data}`)
+    },
+    onError(error) {
+      toast.add({
+        title: error?.data?.message || 'An unexpected error occurred',
+        icon: 'lucide:x',
+        color: 'error',
       })
     },
   },
 }, false)
+
+async function handleSubmit() {
+  await execute({
+    $fetch: {
+      body: { prompt: prompt.value },
+    },
+  })
+}
 </script>

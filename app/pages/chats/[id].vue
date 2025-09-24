@@ -78,7 +78,7 @@
             </template>
           </UChatMessages>
 
-          <div class="sticky bottom-0 z-10 rounded-b-none bg-default pb-8 [view-transition-name:chat-prompt]">
+          <div class="sticky bottom-0 z-10 rounded-b-none bg-default pb-2 [view-transition-name:chat-prompt]">
             <UChatPrompt
               id="chat-prompt"
               v-model="prompt"
@@ -147,8 +147,8 @@ const components = {
   pre: ProseStreamPre as unknown as DefineComponent,
 }
 
-const { data, execute } = useChatsStore('chat')
-await execute(route.params.id as string)
+const { data, execute, refresh } = useChatsStore('chat')
+execute(route.params.id as string)
 
 const { model, models } = useAiModels()
 const selectedModel = useArrayFind(models, selected => selected.value === model.value)
@@ -174,12 +174,6 @@ if (!data.value) {
   })
 }
 
-const { execute: persist } = useRequest(`/api/chats/${data.value.id}/`, {
-  $fetch: {
-    method: 'PATCH',
-  },
-}, false)
-
 const chat = new Chat({
   id: data.value.id,
   messages: data.value.messages,
@@ -196,29 +190,30 @@ const chat = new Chat({
       color: 'error',
     })
   },
-  async onFinish({ message }) {
-    await persist({
-      $fetch: {
-        body: {
-          messages: message,
-        },
-      },
-    })
+  onFinish() {
+    refresh()
   },
 })
 
-function handleSubmit() {
-  chat.sendMessage(
+async function handleSubmit() {
+  await chat.sendMessage(
     { text: prompt.value },
     { headers: useRequestHeaders(['cookie']) },
   )
   prompt.value = ''
 }
 
-onMounted(() => {
-  if (data.value?.messages.length === 1) {
-    chat.regenerate()
+onMounted(async () => {
+
+  if (data.value) {
+    if (data.value.messages.length === 1) {
+      await nextTick()
+      await chat.regenerate({
+        messageId: data.value.messages[0]?.id,
+      })
+    }
   }
+
 })
 
 </script>

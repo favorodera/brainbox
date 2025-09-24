@@ -105,4 +105,6 @@
 const isCommandPaletteOpen = ref(false)
 
 const user = useSupabaseUser()
+
+const { data } = await useChatsStore('chat')
 </script>
