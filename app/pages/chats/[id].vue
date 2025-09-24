@@ -148,7 +148,7 @@ const components = {
 }
 
 const { data, execute, refresh } = useChatsStore('chat')
-execute(route.params.id as string)
+await execute(route.params.id as string)
 
 const { model, models } = useAiModels()
 const selectedModel = useArrayFind(models, selected => selected.value === model.value)
