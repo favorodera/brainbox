@@ -94,26 +94,6 @@ export default defineLazyEventHandler(() => {
         })
       }
 
-      if (!data.title) {
-        const { text } = await generateText({
-          model: google('gemini-2.5-flash'),
-          system: `You are a title generator for a chat:
-          - Generate a short title based on the first user's message
-          - The title should be less than 30 characters long
-          - The title should be a summary of the user's message
-          - Do not use quotes (' or ") or colons (:) or any other punctuation
-          - Do not use markdown, just plain text`,
-          prompt: JSON.stringify(messages[0]),
-        })
-
-        setHeader(event, 'X-Chat-Title', text.replace(/:/g, '').split('\n')[0])
-
-        await client
-          .from('chats')
-          .update({ title: text })
-          .match({ id, owner_id: user.id })
-      }
-
       const lastMessage = messages[messages.length - 1]
 
       if (lastMessage && lastMessage.role === 'user') {
@@ -147,12 +127,36 @@ export default defineLazyEventHandler(() => {
         },
         onFinish: async ({ messages }) => {
           const lastMessage = messages[messages.length - 1]
-        
+
           await client.rpc('append_chat_message', {
             p_chat_id: id,
             p_owner_id: user.id,
             p_message: lastMessage as unknown as Json,
           })
+
+          if (!data.title) {
+            void (async () => {
+              try {
+                const { text } = await generateText({
+                  model: google('gemini-2.5-flash'),
+                  system: `You are a title generator for a chat:
+                  - Generate a short title based on the first user's message
+                  - The title should be less than 30 characters long
+                  - The title should be a summary of the user's message
+                  - Do not use quotes (' or ") or colons (:) or any other punctuation
+                  - Do not use markdown, just plain text`,
+                  prompt: JSON.stringify(messages[0]),
+                })
+        
+                await client
+                  .from('chats')
+                  .update({ title: text.replace(/:/g, '').split('\n')[0].trim() })
+                  .match({ id, owner_id: user.id })
+              } catch {
+                // Ignore errors
+              }
+            })()
+          }
         },
       })
   

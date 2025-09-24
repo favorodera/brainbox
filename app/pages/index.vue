@@ -25,14 +25,16 @@
             autofocus
             autoresize
             :maxrows="6"
+            :disabled="status === 'pending' || status === 'success'"
             :ui="{
               footer: 'justify-between gap-4',
             }"
-            @submit="handleSubmit()"
+            @submit="execute()"
           >
 
             <template #footer>
               <USelectMenu
+                id="model-select"
                 v-model="model"
                 :items="models"
                 :icon="selectedModel?.icon"
@@ -51,8 +53,8 @@
               <UButton
                 type="submit"
                 icon="lucide:send"
-                :loading="status === 'pending'"
-                :disabled="status === 'pending' || prompt.trim() === ''"
+                :loading="status === 'pending' || status === 'success'"
+                :disabled="status === 'pending' || status === 'success' || prompt.trim() === ''"
               />
             </template>
 
@@ -77,7 +79,7 @@ const { model, models } = useAiModels()
 
 const selectedModel = useArrayFind(models, selected => selected.value === model.value)
 
-const prompt = ref('')
+const { prompt } = useChatsStore()
 
 const { status, execute } = useRequest<string>('/api/chats/', {
   $fetch: {
@@ -96,12 +98,4 @@ const { status, execute } = useRequest<string>('/api/chats/', {
     },
   },
 }, false)
-
-async function handleSubmit() {
-  await execute({
-    $fetch: {
-      body: { prompt: prompt.value },
-    },
-  })
-}
 </script>

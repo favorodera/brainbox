@@ -51,21 +51,20 @@
           :collapsed="collapsed"
           orientation="vertical"
           tooltip
+          :items="items"
           popover
           :ui="{ link: 'overflow-hidden' }"
           :unmount-on-hide="false"
         >
           <template #chat-trailing>
-            <div class="-mr-1.25 flex translate-x-full transition-transform group-hover:translate-x-0">
-              <UButton
-                icon="lucide:trash-2"
-                color="neutral"
-                variant="ghost"
-                size="xs"
-                class="p-0.5 text-muted hover:bg-accented/50 hover:text-primary focus-visible:bg-accented/50"
-                tabindex="-1"
-              />
-            </div>
+            <UButton
+              icon="lucide:trash-2"
+              color="error"
+              variant="ghost"
+              size="xs"
+              class="p-0.5 text-muted hover:bg-accented/50 hover:text-primary focus-visible:bg-accented/50"
+              tabindex="-1"
+            />
           </template>
         </UNavigationMenu>
 
@@ -83,14 +82,12 @@
       placeholder="Search chats..."
       :groups="[{
         id: 'links',
-        items: [
-          {
-            label: 'New chat',
-            icon: 'lucide:square-pen',
-            to: '/',
-          },
-        ],
-      }]"
+        items: [{
+          label: 'New chat',
+          to: '/',
+          icon: 'lucide:square-pen',
+        }],
+      }, ...groups]"
     />
 
     <slot />
@@ -106,5 +103,19 @@ const isCommandPaletteOpen = ref(false)
 
 const user = useSupabaseUser()
 
-const { data } = await useChatsStore('chat')
+const { data } = await useChatsStore('chats')
+
+const { groups } = groupChats(data)
+
+const items = computed(() => groups.value?.flatMap((group) => {
+  return [{
+    label: group.label,
+    type: 'label' as const,
+  }, ...group.items.map(item => ({
+    ...item,
+    slot: 'chat' as const,
+    icon: undefined,
+    class: item.label === 'Untitled' ? 'text-muted' : '',
+  }))]
+}))
 </script>

@@ -14,113 +14,151 @@
       <template #body>
         <UContainer class="grid flex-1 grid-cols-1 gap-4 sm:gap-6">
 
-          <UChatMessages
-            should-auto-scroll
-            :messages="chat.messages"
-            :status="chat.status"
-            :assistant="{
-              actions: [
-                {
-                  label: 'Copy', icon: copied ? 'lucide:copy-check' : 'lucide:copy', onClick: handleCopy,
-                },
-              ],
-            }"
-            class="pb-4 sm:pb-6 lg:pt-(--ui-header-height)"
-            :ui="{
-              indicator: 'h-auto block *:rounded-none *:bg-transparent [&>*:nth-child(1)]:animate-none *:size-auto [&>*:nth-child(3)]:animate-none [&>*:nth-child(4)]:animate-none',
-            }"
-            :spacing-offset="160"
+
+          <div
+            v-if="status === 'fetching'"
+            class="flex flex-col items-center justify-center gap-2"
           >
-            <template #indicator>
-              <UButton
-                class="px-0"
-                color="neutral"
-                variant="link"
-                loading
-                loading-icon="lucide:loader"
-                :ui="{ label: 'animate-pulse text-muted' }"
-                label="Thinking..."
-              />
-            </template>
+            <UIcon
+              name="lucide:loader-circle"
+              class="size-5 animate-spin"
+            />
+            <p class="animate-pulse">
+              Loading Chat...
+            </p>
+          </div>
 
-            <template #content="{ message }">
-
-              <div class="space-y-4">
-
-                <MDCCached
-                  :value="getTextFromMessage(message)"
-                  :cache-key="message.id"
-                  unwrap="p"
-                  :components="components"
-                  :parser-options="{ highlight: false, toc: false }"
-                />
-
-                <template
-                  v-for="(part, index) in message.parts"
-                  :key="`${part.type}-${index}-${message.id}`"
-                >
-
-                  <UButton
-                    v-if="part.type === 'text' && part.state === 'streaming'"
-                    class="px-0"
-                    color="neutral"
-                    variant="link"
-                    loading
-                    loading-icon="lucide:loader"
-                    :ui="{ label: 'animate-pulse text-muted' }"
-                    label="Generating..."
-                  />
-
-                </template>
-
-              </div>
-
-            </template>
-          </UChatMessages>
-
-          <div class="sticky bottom-0 z-10 rounded-b-none bg-default pb-2 [view-transition-name:chat-prompt]">
-            <UChatPrompt
-              id="chat-prompt"
-              v-model="prompt"
+          <div
+            v-else-if="error && status === 'error' && error.data?.statusCode !== 401"
+            class="flex flex-col items-center justify-center gap-2"
+          >
+            <UIcon
+              name="lucide:alert-circle"
+              class="size-5 text-error"
+            />
+            <p class="line-clamp-2">
+              {{ error?.data?.message || 'An unexpected error occurred' }}
+            </p>
+            <UButton
+              label="Retry"
               variant="soft"
-              placeholder="Ask anything..."
-              autofocus
-              autoresize
-              :maxrows="6"
-              :ui="{
-                footer: 'justify-between gap-4',
-              }"
-              @submit="handleSubmit()"
-            >
+              size="sm"
+              @click="execute(route.params.id as string)"
+            />
+          </div>
 
-              <template #footer>
-                <USelectMenu
-                  v-model="model"
-                  :items="models"
-                  :icon="selectedModel?.icon"
-                  variant="ghost"
-                  value-key="value"
-                  :search-input="{
-                    placeholder: 'Search models...',
-                  }"
-                  class="w-min"
-                  :ui="{
-                    leadingIcon: 'size-4',
-                    trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200',
-                  }"
-                />
-  
-                <UChatPromptSubmit
-                  :disabled="prompt.trim() === '' && chat.status !== 'error'"
-                  :status="chat.status"
-                  icon="lucide:send"
-                  @stop="chat.stop"
-                  @reload="chat.regenerate"
+
+          <template v-else>
+
+            <UChatMessages
+              should-auto-scroll
+              :messages="chat.messages"
+              :status="chat.status"
+              :assistant="{
+                actions: [
+                  {
+                    label: 'Copy', icon: copied ? 'lucide:copy-check' : 'lucide:copy', onClick: handleCopy,
+                  },
+                ],
+              }"
+              class="pb-4 sm:pb-6 lg:pt-(--ui-header-height)"
+              :ui="{
+                indicator: 'h-auto block *:rounded-none *:bg-transparent [&>*:nth-child(1)]:animate-none *:size-auto [&>*:nth-child(3)]:animate-none [&>*:nth-child(4)]:animate-none',
+              }"
+              :spacing-offset="160"
+            >
+              <template #indicator>
+                <UButton
+                  class="px-0"
+                  color="neutral"
+                  variant="link"
+                  loading
+                  loading-icon="lucide:loader"
+                  :ui="{ label: 'animate-pulse text-muted' }"
+                  label="Thinking..."
                 />
               </template>
 
-            </UChatPrompt>
-          </div>
+              <template #content="{ message }">
+
+                <div class="space-y-4">
+
+                  <MDCCached
+                    :value="getTextFromMessage(message)"
+                    :cache-key="message.id"
+                    unwrap="p"
+                    :components="components"
+                    :parser-options="{ highlight: false, toc: false }"
+                  />
+
+                  <template
+                    v-for="(part, index) in message.parts"
+                    :key="`${part.type}-${index}-${message.id}`"
+                  >
+                    <UButton
+                      v-if="part.type === 'text' && part.state === 'streaming'"
+                      class="px-0"
+                      color="neutral"
+                      variant="link"
+                      loading
+                      loading-icon="lucide:loader"
+                      :ui="{ label: 'animate-pulse text-muted' }"
+                      label="Generating..."
+                    />
+
+                  </template>
+
+                </div>
+
+              </template>
+            </UChatMessages>
+
+            <div class="sticky bottom-0 z-10 flex h-full flex-col justify-end rounded-b-none bg-default pb-2 [view-transition-name:chat-prompt]">
+              <UChatPrompt
+                id="chat-prompt"
+                v-model="prompt"
+                variant="soft"
+                placeholder="Ask anything..."
+                autofocus
+                autoresize
+                :maxrows="6"
+                :ui="{
+                  footer: 'justify-between gap-4',
+                }"
+                @submit="handleSubmit()"
+              >
+
+                <template #footer>
+                  <USelectMenu
+                    id="model-select"
+                    v-model="model"
+                    :items="models"
+                    :icon="selectedModel?.icon"
+                    variant="ghost"
+                    value-key="value"
+                    :search-input="{
+                      placeholder: 'Search models...',
+                    }"
+                    class="w-min"
+                    :ui="{
+                      leadingIcon: 'size-4',
+                      trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200',
+                    }"
+                  />
+  
+                  <UChatPromptSubmit
+                    :disabled="prompt.trim() === '' && chat.status !== 'error'"
+                    :status="chat.status"
+                    icon="lucide:send"
+                    @stop="chat.stop"
+                    @reload="chat.regenerate"
+                  />
+                </template>
+
+              </UChatPrompt>
+            </div>
+
+          </template>
 
         </UContainer>
       </template>
@@ -147,7 +185,8 @@ const components = {
   pre: ProseStreamPre as unknown as DefineComponent,
 }
 
-const { data, execute, refresh } = useChatsStore('chat')
+const { chats: { refresh }, chat: { data, execute, status, error }, prompt } = useChatsStore()
+
 await execute(route.params.id as string)
 
 const { model, models } = useAiModels()
@@ -163,8 +202,6 @@ const { copy, copied } = useClipboard({
 function handleCopy(event: MouseEvent, message: UIMessage) {
   copy(getTextFromMessage(message))
 }
-
-const prompt = ref('')
 
 if (!data.value) {
   throw createError({
@@ -205,13 +242,8 @@ async function handleSubmit() {
 
 onMounted(async () => {
 
-  if (data.value) {
-    if (data.value.messages.length === 1) {
-      await nextTick()
-      await chat.regenerate({
-        messageId: data.value.messages[0]?.id,
-      })
-    }
+  if (prompt.value !== '') {
+    await handleSubmit()
   }
 
 })
