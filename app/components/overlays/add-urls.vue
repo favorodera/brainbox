@@ -1,3 +1,4 @@
+<!-- Modal form to add multiple personalization URLs with validation -->
 <template>
 
   <UModal
@@ -99,10 +100,12 @@ import z from 'zod'
 
 const emit = defineEmits<{ close: [boolean] }>()
 
+// Store refresh to re-fetch URLs after successful submission
 const { refresh } = useUrlsStore('urls')
 
 const toast = useToast()
 
+// Form validation schema for URL entries
 const schema = z.object({
   urls: z.array(
     z.object({
@@ -114,10 +117,12 @@ const schema = z.object({
 
 type Schema = z.output<typeof schema>
 
+// Reactive form state containing the list of URL rows
 const state = reactive<Partial<Schema>>({
   urls: [{ name: '', url: '' }],
 })
 
+// Request helper to POST URLs to the server API
 const { execute, status } = useRequest('/api/urls', {
   $fetch: {
     method: 'POST',
@@ -145,6 +150,7 @@ const { execute, status } = useRequest('/api/urls', {
   
 }, false)
 
+// Submits the form by sending current URL list to the API
 async function handleSubmit(event: FormSubmitEvent<Schema>) {
 
   await execute({
@@ -157,6 +163,7 @@ async function handleSubmit(event: FormSubmitEvent<Schema>) {
 
 }
 
+// Helpers to add/remove URL rows in the form
 const handleUrls = {
   add() {
     if (!state.urls) {

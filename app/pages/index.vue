@@ -79,7 +79,9 @@ const { model, models } = useAiModels()
 
 const selectedModel = useArrayFind(models, selected => selected.value === model.value)
 
-const { prompt } = useChatsStore()
+const { initPrompt } = useChatsStore()
+
+const prompt = ref('')
 
 const { status, execute } = useRequest<string>('/api/chats/', {
   $fetch: {
@@ -87,6 +89,10 @@ const { status, execute } = useRequest<string>('/api/chats/', {
   },
   hooks: {
     async onSuccess(data) {
+      initPrompt.value = prompt.value
+
+      prompt.value = ''
+
       await navigateTo(`/chats/${data}`)
     },
     onError(error) {

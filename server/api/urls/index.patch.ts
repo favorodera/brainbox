@@ -1,6 +1,8 @@
+// Updates existing URLs in the authenticated user's personalization list
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import { z } from 'zod'
 
+// Body validation schema for URL entries
 const schema = z.object({
   urls: z.array(
     z.object({
@@ -10,6 +12,7 @@ const schema = z.object({
   ),
 })
 
+// PATCH /api/urls → updates provided URLs via RPC
 export default defineEventHandler(async (event) => {
 
   try {
@@ -24,6 +27,7 @@ export default defineEventHandler(async (event) => {
       })
     }
 
+    // Validate request body
     const validate = await readValidatedBody(event, schema.safeParse)
 
     if (validate.error) {
@@ -37,8 +41,10 @@ export default defineEventHandler(async (event) => {
 
     const { urls } = validate.data
 
+    // Supabase client scoped to this request
     const client = await serverSupabaseClient<Database>(event)
 
+    // Use Postgres function to update URLs atomically
     const { error } = await client.rpc('manage_user_urls', {
       p_user_id: user.id,
       p_action: 'update',

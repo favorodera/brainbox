@@ -1,3 +1,4 @@
+<!-- Confirmation modal to sign out the current user -->
 <template>
 
   <UModal
@@ -49,6 +50,7 @@ const user = useSupabaseUser()
 
 const toast = useToast()
 
+// Signs the user out, closes modal, shows toast, then navigates
 async function signOut() {
   try {
     await auth.signOut()

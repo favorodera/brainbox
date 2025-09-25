@@ -1,3 +1,4 @@
+<!-- Confirmation modal to delete selected personalization URLs -->
 <template>
   <UModal
     :close="{ onClick: () => emit('close', false) }"
@@ -62,6 +63,7 @@ const props = defineProps<{
 const { refresh } = useUrlsStore('urls')
 const toast = useToast()
 
+// Request helper to DELETE URLs via the server API
 const { execute, status } = useRequest('/api/urls', {
   $fetch: {
     method: 'DELETE',

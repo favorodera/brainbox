@@ -1,5 +1,7 @@
+// Returns the authenticated user's public profile fields
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 
+// GET /api/user → fetches id, name, avatar, email for current user
 export default defineEventHandler(async (event) => {
 
   try {
@@ -13,6 +15,7 @@ export default defineEventHandler(async (event) => {
       })
     }
 
+    // Supabase client scoped to this request
     const client = await serverSupabaseClient<Database>(event)
 
     const { error, data } = await client

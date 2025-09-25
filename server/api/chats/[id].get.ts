@@ -1,10 +1,13 @@
+// Fetches a single chat (id/messages/title) for the authenticated owner
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import { z } from 'zod'
 
+// Route params validation schema
 const schema = z.object({
   id: z.string(),
 })
 
+// GET /api/chats/:id → returns chat content if owned by requester
 export default defineEventHandler(async (event) => {
 
   try {
@@ -19,6 +22,7 @@ export default defineEventHandler(async (event) => {
       })
     }
 
+    // Validate and parse route params
     const validate = await getValidatedRouterParams(event, schema.safeParse)
 
     if (validate.error) {
@@ -32,6 +36,7 @@ export default defineEventHandler(async (event) => {
 
     const { id } = validate.data
 
+    // Supabase client scoped to this request
     const client = await serverSupabaseClient<Database>(event)
 
     const { error, data } = await client

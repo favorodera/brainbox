@@ -1,3 +1,4 @@
+<!-- Modal form to edit existing personalization URLs with change detection -->
 <template>
   <UModal
     :close="{ onClick: () => emit('close', false) }"
@@ -83,9 +84,11 @@ const props = defineProps<{
 
 const emit = defineEmits<{ close: [boolean] }>()
 
+// Store refresh to re-fetch URLs after successful update
 const { refresh } = useUrlsStore('urls')
 const toast = useToast()
 
+// Form validation schema for URL entries
 const schema = z.object({
   urls: z.array(
     z.object({
@@ -97,10 +100,12 @@ const schema = z.object({
 
 type Schema = z.output<typeof schema>
 
+// Local copy of the URLs to edit in-place
 const state = ref<Schema>({
   urls: props.urls.map(url => ({ ...url })),
 })
 
+// Tracks whether any field changed to enable Save button
 const anyChangeOccurred = computed(() => {
   return props.urls.some((item, index) => {
     const current = state.value.urls[index]
@@ -109,6 +114,7 @@ const anyChangeOccurred = computed(() => {
 })
 
 
+// Request helper to PATCH URLs to the server API
 const { execute, status } = useRequest('/api/urls', {
   $fetch: {
     method: 'PATCH',
@@ -135,6 +141,7 @@ const { execute, status } = useRequest('/api/urls', {
   },
 }, false)
 
+// Submits the form by sending updated URLs to the API
 async function handleSubmit(event: FormSubmitEvent<Schema>) {
   await execute({
     $fetch: {

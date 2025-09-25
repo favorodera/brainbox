@@ -1,3 +1,4 @@
+<!-- Syntax-highlighted code block renderer backed by cached Shiki highlighter -->
 <template>
   <ProsePre v-bind="props">
     <ShikiCachedRenderer
@@ -16,6 +17,7 @@ import { ShikiCachedRenderer } from 'shiki-stream/vue'
 const colorMode = useColorMode()
 const { $highlighter: highlighter } = useNuxtApp()
 
+// Props passed by content renderer for code blocks
 const props = defineProps<{
   code: string
   language: string
@@ -23,10 +25,12 @@ const props = defineProps<{
   meta?: string
 }>()
 
+// Trim trailing backticks left by streaming
 const trimmedCode = computed(() => {
   return props.code.trim().replace(/`+$/, '')
 })
 
+// Normalize language names to Shiki grammar ids
 const lang = computed(() => {
   switch (props.language) {
     case 'vue':
@@ -42,6 +46,7 @@ const lang = computed(() => {
   }
 })
 
+// Rerender when theme or language changes to refresh highlighting
 const key = computed(() => {
   return `${lang.value}-${colorMode.value}`
 })

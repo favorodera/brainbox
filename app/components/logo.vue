@@ -1,3 +1,4 @@
+<!-- Branded logo with optional text and style overrides -->
 <template>
 
   <div
@@ -24,6 +25,7 @@
 </template>
 
 <script setup lang="ts">
+// Accepts flags and class hooks to customize logo appearance
 withDefaults(defineProps<{
   withText?: boolean
   ui?: {

@@ -1,3 +1,4 @@
+<!-- Account settings: user profile summary and plan usage -->
 <template>
 
   <div class="space-y-2">
@@ -51,6 +52,7 @@
 </template>
 
 <script setup lang="ts">
+// Load user profile to display name, email, and avatar
 const { data: user } = await useUserStore('user')
 </script>
 

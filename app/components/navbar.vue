@@ -1,3 +1,4 @@
+<!-- Dashboard navbar showing auth-aware actions and help menu -->
 <template>
   <UDashboardNavbar
     class="border-none"
@@ -58,6 +59,7 @@
 </template>
 
 <script setup lang="ts">
+// Reactive Supabase user used to toggle navbar items
 const user = useSupabaseUser()
 </script>
 

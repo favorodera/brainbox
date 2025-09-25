@@ -96,7 +96,7 @@
                     :key="`${part.type}-${index}-${message.id}`"
                   >
                     <UButton
-                      v-if="part.type === 'text' && part.state === 'streaming'"
+                      v-if="part.type === 'text' && part.state !== 'done' && message.role === 'assistant'"
                       class="px-0"
                       color="neutral"
                       variant="link"
@@ -185,7 +185,9 @@ const components = {
   pre: ProseStreamPre as unknown as DefineComponent,
 }
 
-const { chats: { refresh }, chat: { data, execute, status, error }, prompt } = useChatsStore()
+const { chats: { refresh }, chat: { data, execute, status, error }, initPrompt } = useChatsStore()
+
+const prompt = ref('')
 
 await execute(route.params.id as string)
 
@@ -232,18 +234,22 @@ const chat = new Chat({
   },
 })
 
-async function handleSubmit() {
-  await chat.sendMessage(
+function handleSubmit() {
+  chat.sendMessage(
     { text: prompt.value },
     { headers: useRequestHeaders(['cookie']) },
   )
   prompt.value = ''
 }
 
-onMounted(async () => {
+onMounted(() => {
 
-  if (prompt.value !== '') {
-    await handleSubmit()
+  if (initPrompt.value.trim() !== '') {
+    chat.sendMessage(
+      { text: initPrompt.value },
+      { headers: useRequestHeaders(['cookie']) },
+    )
+    initPrompt.value = ''
   }
 
 })

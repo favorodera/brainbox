@@ -1,18 +1,22 @@
+// Streams an AI response for a chat and persists messages/title
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import { convertToModelMessages, createUIMessageStream, createUIMessageStreamResponse, generateText, streamText } from 'ai'
 import type { UIMessage } from 'ai'
 import { z } from 'zod'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
 
+// Route params validation schema
 const paramsSchema = z.object({
   id: z.string(),
 })
 
+// Request body validation schema
 const bodySchema = z.object({
   model: z.custom<AIModel>(),
   messages: z.array(z.custom<UIMessage>()),
 })
 
+// POST /api/chats/:id → validates, streams model output, saves messages
 export default defineLazyEventHandler(() => {
 
   const { googleGenerativeAiKey } = useRuntimeConfig()
@@ -25,6 +29,7 @@ export default defineLazyEventHandler(() => {
     })
   }
 
+  // Instantiate Google AI provider
   const google = createGoogleGenerativeAI({
     apiKey: googleGenerativeAiKey,
   })
@@ -43,6 +48,7 @@ export default defineLazyEventHandler(() => {
         })
       }
 
+      // Validate path params
       const validateParams = await getValidatedRouterParams(event, paramsSchema.safeParse)
 
       if (validateParams.error) {
@@ -54,6 +60,7 @@ export default defineLazyEventHandler(() => {
         })
       }
 
+      // Validate request body
       const validateBody = await readValidatedBody(event, bodySchema.safeParse)
 
       if (validateBody.error) {
@@ -69,6 +76,7 @@ export default defineLazyEventHandler(() => {
 
       const { messages, model } = validateBody.data
 
+      // Supabase client scoped to this request
       const client = await serverSupabaseClient<Database>(event)
 
       const { error, data } = await client
@@ -113,8 +121,10 @@ export default defineLazyEventHandler(() => {
         }
       }
 
+      // Map UI model value (e.g. google/gemini-2.5-flash) to provider model id
       const modelRefined = google(model.split('/')[1])
 
+      // Stream model tokens to the UI and persist messages on finish
       const stream = createUIMessageStream({
         execute: ({ writer }) => {
           const result = streamText({

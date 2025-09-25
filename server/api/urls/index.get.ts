@@ -1,5 +1,7 @@
+// Returns the authenticated user's personalization URLs array
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 
+// GET /api/urls → fetches user's stored URLs from Supabase
 export default defineEventHandler(async (event) => {
 
   try {
@@ -13,6 +15,7 @@ export default defineEventHandler(async (event) => {
       })
     }
 
+    // Supabase client scoped to this request
     const client = await serverSupabaseClient<Database>(event)
 
     const { error, data } = await client

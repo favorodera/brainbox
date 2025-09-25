@@ -1,3 +1,4 @@
+<!-- Data controls: manage stored chat data and bulk actions -->
 <template>
 
   <div class="space-y-2">

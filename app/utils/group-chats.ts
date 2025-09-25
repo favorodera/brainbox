@@ -1,3 +1,4 @@
+// Utilities to group chat items by recency buckets for sidebar navigation
 import { isToday, isYesterday, subMonths } from 'date-fns'
 
 interface Chat {
@@ -7,15 +8,17 @@ interface Chat {
   createdAt: string
 }
 
+// Returns computed groups of chats organized by Today/Yesterday/Last week/Last month/Older
 export default function (chats: Ref<Chat[] | undefined | null>) {
   const groups = computed(() => {
-    // Group chats by date
+    // Buckets to accumulate chats by relative date
     const today: Chat[] = []
     const yesterday: Chat[] = []
     const lastWeek: Chat[] = []
     const lastMonth: Chat[] = []
     const older: Record<string, Chat[]> = {}
 
+    // Thresholds for week (~7 days) and month comparisons
     const oneWeekAgo = subMonths(new Date(), 0.25) // ~7 days ago
     const oneMonthAgo = subMonths(new Date(), 1)
 
@@ -31,7 +34,7 @@ export default function (chats: Ref<Chat[] | undefined | null>) {
       } else if (chatDate >= oneMonthAgo) {
         lastMonth.push(chat)
       } else {
-        // Format: "January 2023", "February 2023", etc.
+        // Group older chats by formatted month-year label
         const monthYear = chatDate.toLocaleDateString('en-US', {
           month: 'long',
           year: 'numeric',
@@ -45,21 +48,21 @@ export default function (chats: Ref<Chat[] | undefined | null>) {
       }
     })
 
-    // Sort older chats by month-year in descending order (newest first)
+    // Sort month-year keys newest-first for stable display order
     const sortedMonthYears = Object.keys(older).sort((a, b) => {
       const dateA = new Date(a)
       const dateB = new Date(b)
       return dateB.getTime() - dateA.getTime()
     })
 
-    // Create formatted groups for navigation
+    // Build normalized group objects for UI navigation
     const formattedGroups = [] as Array<{
       id: string
       label: string
       items: Array<Chat>
     }>
 
-    // Add groups that have chats
+    // Append non-empty recency groups in fixed order
     if (today.length) {
       formattedGroups.push({
         id: 'today',
@@ -92,7 +95,7 @@ export default function (chats: Ref<Chat[] | undefined | null>) {
       })
     }
 
-    // Add each month-year group
+    // Append each populated month-year group
     sortedMonthYears.forEach((monthYear) => {
       if (older[monthYear]?.length) {
         formattedGroups.push({

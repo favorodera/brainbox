@@ -1,3 +1,4 @@
+<!-- Modal to search, select, and CRUD user personalization URLs -->
 <template>
   <UModal
     :close="{ onClick: () => emit('close', false) }"
@@ -173,10 +174,12 @@
 import { LazyOverlaysAddUrls, LazyOverlaysDeleteUrlsConfirmation, LazyOverlaysEditUrls, UButton, UIcon } from '#components'
 import type { TableColumn, TableRow } from '@nuxt/ui'
 
+// URLs store provides list, loading state, error, and refetch
 const { data, status, error, execute } = useUrlsStore('urls')
 
 const emit = defineEmits<{ close: [boolean] }>()
 
+// Overlay factory to open nested modals for add/edit/delete
 const overlay = useOverlay()
 const addUrlsModal = overlay.create(LazyOverlaysAddUrls)
 const deleteUrlsConfirmationModal = overlay.create(LazyOverlaysDeleteUrlsConfirmation)
@@ -184,18 +187,22 @@ const editUrlsModal = overlay.create(LazyOverlaysEditUrls)
 
 const table = useTemplateRef('table')
 
+// Table pagination state
 const pagination = ref({
   pageIndex: 0,
   pageSize: 10,
 })
 
+// Selected rows and global search filter
 const rowSelection = ref<Record<string, boolean>>({})
 const globalFilter = ref('')
 
+// Toggles selection when a row is clicked
 function onSelect(row: TableRow<{ name: string, url: string }>, _event?: Event) {
   row.toggleSelected()
 }
 
+// Derives the list of selected URL objects
 const selectedRows = computed((): { name: string, url: string }[] => {
   const tableApi = table.value?.tableApi
   if (!tableApi) return []
@@ -203,6 +210,7 @@ const selectedRows = computed((): { name: string, url: string }[] => {
 })
 
 
+// Table column definitions and custom cell to show name+URL
 const columns = ref<TableColumn<{ name: string, url: string }>[]>([
   {
     accessorKey: 'name',
@@ -228,6 +236,7 @@ const columns = ref<TableColumn<{ name: string, url: string }>[]>([
   },
 ])
 
+// Reset selection and filter when data is refreshing
 whenever(() => status.value === 'refreshing', () => {
   table.value?.tableApi?.resetRowSelection()
   table.value?.tableApi?.resetGlobalFilter()

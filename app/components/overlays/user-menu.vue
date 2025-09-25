@@ -1,3 +1,4 @@
+<!-- Profile dropdown with settings and sign-out actions -->
 <template>
   <UDropdownMenu
     :items="dropdownMenuItems"
@@ -34,12 +35,15 @@ defineProps<{
   collapsed?: boolean
 }>()
 
+// Overlay factory to open sign-out confirmation and settings modals
 const overlay = useOverlay()
 const signOutConfirmationModal = overlay.create(LazyOverlaysSignoutConfirmation)
 const settingsModal = overlay.create(LazyOverlaysSettings)
 
+// Load current user's profile for avatar and name
 const { data: user } = await useUserStore('user')
 
+// Menu sections: account info + actions
 const dropdownMenuItems = ref<DropdownMenuItem[][]>([
   
   [

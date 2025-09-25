@@ -62,7 +62,6 @@
               color="error"
               variant="ghost"
               size="xs"
-              class="p-0.5 text-muted hover:bg-accented/50 hover:text-primary focus-visible:bg-accented/50"
               tabindex="-1"
             />
           </template>
