@@ -1,19 +1,13 @@
-// Fetches a single chat (id/messages/title) for the authenticated owner
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import { z } from 'zod'
 
-// Route params validation schema
 const schema = z.object({
-  id: z.string(),
+  message: z.custom<UIMessageExtension>(),
 })
 
-// GET /api/chats/:id → returns chat content if owned by requester
 export default defineEventHandler(async (event) => {
-
   try {
-
     const user = await serverSupabaseUser(event)
-
     if (!user) {
       throw createError({
         statusCode: 401,
@@ -22,28 +16,29 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Validate and parse route params
-    const validate = await getValidatedRouterParams(event, schema.safeParse)
-
+    const validate = await readValidatedBody(event, schema.safeParse)
     if (validate.error) {
       const issue = validate.error.issues[0]
       throw createError({
         statusCode: 400,
         statusMessage: 'BAD_REQUEST',
-        message: issue ? `${issue.path}: ${issue.message}` : 'Invalid query parameters',
+        message: issue
+          ? `${issue.path}: ${issue.message}`
+          : 'Invalid body parameters',
       })
     }
 
-    const { id } = validate.data
-
-    // Supabase client scoped to this request
+    const { message } = validate.data
     const client = await serverSupabaseClient<Database>(event)
 
-    const { error, data } = await client
-      .from('chat_with_messages')
-      .select('id, title, messages')
-      .match({ id, owner_id: user.id })
-      .single()
+    const { error } = await client.from('messages').insert({
+      id: message.id,
+      chat_id: message.chat_id,
+      owner_id: user.id,
+      role: message.role,
+      parts: message.parts as unknown as Json[],
+      created_at: message.created_at,
+    })
 
     if (error) {
       throw createError({
@@ -53,8 +48,7 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    return data
-
+    return { success: true }
   } catch (error) {
     return getError(error)
   }

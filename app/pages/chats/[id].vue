@@ -57,7 +57,10 @@
               :assistant="{
                 actions: [
                   {
-                    label: 'Copy', icon: copied ? 'lucide:copy-check' : 'lucide:copy', onClick: handleCopy,
+                    label: 'Copy',
+                    icon: copied ? 'lucide:copy-check' : 'lucide:copy',
+                    onClick: handleCopy,
+                    class: 'opacity-100',
                   },
                 ],
               }"
@@ -96,7 +99,7 @@
                     :key="`${part.type}-${index}-${message.id}`"
                   >
                     <UButton
-                      v-if="part.type === 'text' && part.state !== 'done' && message.role === 'assistant'"
+                      v-if="part.type === 'text' && part.state === 'streaming'"
                       class="px-0"
                       color="neutral"
                       variant="link"

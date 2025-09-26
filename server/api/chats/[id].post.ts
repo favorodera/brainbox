@@ -7,6 +7,7 @@ import { createGoogleGenerativeAI } from '@ai-sdk/google'
 
 // Route params validation schema
 const paramsSchema = z.object({
+  /** Chat ID */
   id: z.string(),
 })
 
@@ -37,6 +38,8 @@ export default defineLazyEventHandler(() => {
   return defineEventHandler(async (event) => {
 
     try {
+
+      const timestamp = new Date().toISOString()
 
       const user = await serverSupabaseUser(event)
 
@@ -79,6 +82,8 @@ export default defineLazyEventHandler(() => {
       // Supabase client scoped to this request
       const client = await serverSupabaseClient<Database>(event)
 
+      const { addToQueue } = indexDb()
+
       const { error, data } = await client
         .from('chats')
         .select('id, title')
@@ -105,12 +110,16 @@ export default defineLazyEventHandler(() => {
       const lastMessage = messages[messages.length - 1]
 
       if (lastMessage && lastMessage.role === 'user') {
-        const { error } = await client.rpc('append_chat_message', {
-          p_chat_id: id,
-          p_owner_id: user.id,
-          p_message: lastMessage as unknown as Json,
-        })
     
+        const { error } = await client
+          .from('messages')
+          .insert({
+            chat_id: id,
+            id: lastMessage.id,
+            role: lastMessage.role,
+            created_at: timestamp,
+            parts: lastMessage.parts as unknown as Json[],
+          })
 
         if (error) {
           throw createError({
@@ -135,39 +144,51 @@ export default defineLazyEventHandler(() => {
     
           writer.merge(result.toUIMessageStream())
         },
-        onFinish: async ({ messages }) => {
-          const lastMessage = messages[messages.length - 1]
+        onFinish: async ({ responseMessage }) => {
 
-          await client.rpc('append_chat_message', {
-            p_chat_id: id,
-            p_owner_id: user.id,
-            p_message: lastMessage as unknown as Json,
-          })
+          try {
+            await client
+              .from('messages')
+              .insert({
+                chat_id: id,
+                id: responseMessage.id,
+                role: responseMessage.role,
+                created_at: timestamp,
+                parts: responseMessage.parts as unknown as Json[],
+              })
 
-          if (!data.title) {
-            void (async () => {
+            if (!data.title) {
               try {
                 const { text } = await generateText({
                   model: google('gemini-2.5-flash'),
                   system: `You are a title generator for a chat:
-                  - Generate a short title based on the first user's message
-                  - The title should be less than 30 characters long
-                  - The title should be a summary of the user's message
-                  - Do not use quotes (' or ") or colons (:) or any other punctuation
-                  - Do not use markdown, just plain text`,
+                        - Generate a short title based on the first user's message
+                        - The title should be less than 30 characters long
+                        - The title should be a summary of the user's message
+                        - Do not use quotes (' or ") or colons (:) or any other punctuation
+                        - Do not use markdown, just plain text`,
                   prompt: JSON.stringify(messages[0]),
                 })
-        
+          
                 await client
                   .from('chats')
                   .update({ title: text.replace(/:/g, '').split('\n')[0].trim() })
                   .match({ id, owner_id: user.id })
               } catch {
-                // Ignore errors
+                // Fail silently
               }
-            })()
+            }
+          } catch {
+            await addToQueue({
+              ...lastMessage,
+              chat_id: id,
+              created_at: timestamp,
+            }, 0)
           }
+    
+
         },
+        
       })
   
       return createUIMessageStreamResponse({

@@ -106,6 +106,8 @@ const { data } = await useChatsStore('chats')
 
 const { groups } = groupChats(data)
 
+const { startRetryWorker, processQueue, stopRetryWorker } = indexDb()
+
 const items = computed(() => groups.value?.flatMap((group) => {
   return [{
     label: group.label,
@@ -117,4 +119,17 @@ const items = computed(() => groups.value?.flatMap((group) => {
     class: item.label === 'Untitled' ? 'text-muted' : '',
   }))]
 }))
+
+onMounted(async () => {
+  await nextTick()
+
+  useEventListener('online', () => {
+    startRetryWorker()
+    processQueue()
+  })
+
+  useEventListener('offline', () => {
+    stopRetryWorker()
+  })
+})
 </script>

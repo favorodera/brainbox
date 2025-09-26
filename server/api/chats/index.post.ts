@@ -21,9 +21,7 @@ export default defineEventHandler(async (event) => {
 
     const { error, data } = await client
       .from('chats')
-      .insert({
-        messages: [],
-      })
+      .insert({ title: null })
       .select('id')
       .single()
 
