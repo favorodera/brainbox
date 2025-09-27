@@ -19,13 +19,27 @@ async function addToQueue(
 ) {
   const queued: QueuedMessage = { ...message, retries, nextAttempt }
   await storage.setItem(`${STORE_NAME}:${message.id}`, queued)
-  console.log('[queue] added', queued)
 }
 
 async function removeFromQueue(id: string) {
   await storage.removeItem(`${STORE_NAME}:${id}`)
 }
 
+async function getReadyQueued() {
+  const allKeys = await storage.getKeys(STORE_NAME)
+  const now = Date.now()
+  const messages: QueuedMessage[] = []
+
+  for (const key of allKeys) {
+    const message = await storage.getItem(key)
+    if (message && (!message.nextAttempt || message.nextAttempt <= now)) {
+      messages.push(message)
+    }
+  }
+
+  return messages
+
+}
 
 export default function () {
   return {

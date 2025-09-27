@@ -151,12 +151,10 @@ export default defineLazyEventHandler(() => {
                 parts: responseMessage.parts as unknown as Json[],
               })
         
-            await Promise.reject(new Error('test'))
-
             if (!chat.title) {
               try {
                 const { text } = await generateText({
-                  model: google('gemini-2.5-flash'),
+                  model: model,
                   system: title,
                   prompt: JSON.stringify(messages[0]),
                 })
