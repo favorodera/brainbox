@@ -54,70 +54,29 @@
               :messages="chat.messages"
               :status="chat.status"
               class="pb-4 sm:pb-6 lg:pt-(--ui-header-height)"
-              :ui="{
-                indicator: 'h-auto block *:rounded-none *:bg-transparent [&>*:nth-child(1)]:animate-none *:size-auto [&>*:nth-child(3)]:animate-none [&>*:nth-child(4)]:animate-none',
-              }"
               :spacing-offset="160"
+              :assistant="{
+                actions: [
+                  {
+                    icon: copied ? 'lucide:copy-check' : 'lucide:copy',
+                    label: 'Copy',
+                    variant: 'link',
+                    onClick: handleCopy,
+                  },
+                ],
+              }"
             >
-              <template #indicator>
-                <UButton
-                  class="px-0"
-                  color="neutral"
-                  variant="link"
-                  loading
-                  loading-icon="lucide:loader"
-                  :ui="{ label: 'animate-pulse text-muted' }"
-                  label="Thinking..."
+
+              <template #content="{ message }">
+                <MDCCached
+                  :value="getTextFromMessage(message)"
+                  :cache-key="message.id"
+                  unwrap="p"
+                  :components="components"
+                  :parser-options="{ highlight: false, toc: false }"
                 />
               </template>
 
-              <template #actions="{ message }">
-                <template
-                  v-for="(part, index) in message.parts"
-                  :key="`${part.type}-${index}-${message.id}`"
-                >
-  
-                  <UTooltip text="Copy">
-                    <UButton
-                      v-if="part.type === 'text' && part.state === 'done'"
-                      color="neutral"
-                      variant="link"
-                      :icon="copied ? 'lucide:copy-check' : 'lucide:copy'"
-                      @click="handleCopy($event, message)"
-                    />
-                  </UTooltip>
-
-                </template>
-
-              </template>
-
-              <template #content="{ message }">
-
-                <div class="space-y-4">
-
-                  <MDCCached
-                    :value="getTextFromMessage(message)"
-                    :cache-key="message.id"
-                    unwrap="p"
-                    :components="components"
-                    :parser-options="{ highlight: false, toc: false }"
-                  />
-
-                  <UButton
-                    v-if="message.role === 'assistant' && chat.status !== 'ready' && chat.status !== 'error'"
-                    class="px-0"
-                    color="neutral"
-                    variant="link"
-                    loading
-                    loading-icon="lucide:loader"
-                    :ui="{ label: 'animate-pulse text-muted' }"
-                    label="Generating..."
-                  />
-
-
-                </div>
-
-              </template>
             </UChatMessages>
 
             <div class="sticky bottom-0 z-10 flex h-full flex-col justify-end rounded-b-none bg-default pb-2 [view-transition-name:chat-prompt]">
@@ -188,7 +147,7 @@ const prompt = ref('')
 const toast = useToast()
 
 const { copy, copied } = useClipboard({
-  copiedDuring: 2000,
+  copiedDuring: 1000,
   legacy: true,
 })
 
@@ -243,9 +202,3 @@ onMounted(() => {
 })
 
 </script>
-
-<style scoped>
-:deep(.group-hover\/message\:opacity-100) {
-  opacity:100
-}
-</style>

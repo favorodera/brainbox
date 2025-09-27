@@ -15,7 +15,7 @@
 import { ShikiCachedRenderer } from 'shiki-stream/vue'
 
 const colorMode = useColorMode()
-const { $highlighter: highlighter } = useNuxtApp()
+const highlighter = await useHighlighter()
 
 // Props passed by content renderer for code blocks
 const props = defineProps<{
