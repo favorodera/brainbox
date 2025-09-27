@@ -31,7 +31,7 @@ export async function removeFromQueue(id: string) {
   await db.delete(STORE_NAME, id)
 }
 
-async function getReadyQueued(): Promise<QueuedMessage[]> {
+async function getReadyQueued() {
   const db = await getDB()
   const all = (await db.getAll(STORE_NAME)) as QueuedMessage[]
   const now = Date.now()

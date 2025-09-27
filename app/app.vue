@@ -33,10 +33,7 @@ useSeoMeta({
     { content: '#090909', media: '(prefers-color-scheme: dark)' },
     { content: 'white', media: '(prefers-color-scheme: light)' },
   ],
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-  },
+  viewport: 'width=device-width, initial-scale=1',
 })
 
 useHead({

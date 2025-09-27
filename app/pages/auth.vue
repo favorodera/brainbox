@@ -31,7 +31,6 @@
       
           <template #footer>
             By continuing, you agree to our Terms of Service and Privacy Policy
-
           </template>
         </UAuthForm>
         

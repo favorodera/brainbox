@@ -72,14 +72,14 @@ export type Database = {
           {
             foreignKeyName: "messages_owner_id_chat_id_fkey"
             columns: ["owner_id", "chat_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "chat_with_messages"
             referencedColumns: ["owner_id", "id"]
           },
           {
             foreignKeyName: "messages_owner_id_chat_id_fkey"
             columns: ["owner_id", "chat_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "chats"
             referencedColumns: ["owner_id", "id"]
           },
@@ -116,22 +116,11 @@ export type Database = {
     Views: {
       chat_with_messages: {
         Row: {
+          chat_created_at: string | null
           id: string | null
           messages: Json | null
           owner_id: string | null
           title: string | null
-        }
-        Insert: {
-          id?: string | null
-          messages?: never
-          owner_id?: string | null
-          title?: string | null
-        }
-        Update: {
-          id?: string | null
-          messages?: never
-          owner_id?: string | null
-          title?: string | null
         }
         Relationships: [
           {
