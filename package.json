@@ -23,7 +23,7 @@
     "@vaxee/nuxt": "^0.12.1",
     "@vueuse/nuxt": "^13.9.0",
     "ai": "^5.0.54",
-    "idb": "^8.0.3",
+    "idb-keyval": "^6.2.2",
     "nuxt": "^4.1.2",
     "shiki-stream": "^0.1.2",
     "tailwindcss": "^4.1.13",

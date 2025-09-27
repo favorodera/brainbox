@@ -84,6 +84,7 @@
                 id="chat-prompt"
                 v-model="prompt"
                 variant="soft"
+                :error="chat.error"
                 placeholder="Ask anything..."
                 autofocus
                 autoresize
@@ -187,6 +188,8 @@ function handleSubmit() {
     { headers: useRequestHeaders(['cookie']) },
   )
   prompt.value = ''
+
+  
 }
 
 onMounted(() => {

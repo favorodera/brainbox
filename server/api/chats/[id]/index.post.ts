@@ -35,11 +35,11 @@ export default defineLazyEventHandler(() => {
   })
 
   const model = google('gemini-2.5-flash')
+  const { title } = systemPrompt()
 
   return defineEventHandler(async (event) => {
 
     try {
-
       const timestamp = new Date().toISOString()
 
       const user = await serverSupabaseUser(event)
@@ -80,8 +80,6 @@ export default defineLazyEventHandler(() => {
       const { messages } = validateBody.data
 
       const client = await serverSupabaseClient<Database>(event)
-
-      const { addToQueue } = indexDb()
 
       const { error, data: chat } = await client
         .from('chats')
@@ -153,33 +151,17 @@ export default defineLazyEventHandler(() => {
                 parts: responseMessage.parts as unknown as Json[],
               })
         
+            await Promise.reject(new Error('test'))
+
             if (!chat.title) {
               try {
                 const { text } = await generateText({
                   model: google('gemini-2.5-flash'),
-                  system: `
-                  Create a short title (3 to 5 words, max 30 characters) based only on the user's first message.
-                  
-                  Rules:
-                  - No punctuation, no markdown, no filler words.
-                  - Use natural word order so it sounds like a real topic.
-                  - Ignore emojis, numbers, or symbols.
-                  - If the first message is just a greeting (hello, hi, hey, how are you, etc.), return "Greetings".
-                  - If it is just a farewell (bye, goodbye, goodnight, see you later, etc.), return "Farewell".
-                  - If the message is empty, meaningless, or provides no useful context, return "General Chat".
-                  - Otherwise, make a concise but clear title capturing the main subject.
-                  
-                  Examples:
-                  "Whats football all about" → "Football Basics"
-                  "Tell me how rockets work" → "Rocket Science Overview"
-                  "How are you" → "Greetings"
-                  "Bye for now" → "Farewell"
-                  "???" → "General Chat"
-                  `,
+                  system: title,
                   prompt: JSON.stringify(messages[0]),
                 })
                 
-                const normalized = text.replace(/:/g, '').split('\n')[0].trim()
+                const normalized = text.replace(/:/g, '').split('\n')[0]?.trim()
         
                 await client
                   .from('chats')
@@ -190,12 +172,7 @@ export default defineLazyEventHandler(() => {
               }
             }
           } catch {
-            // Queue the AI response if persistence fails
-            await addToQueue({
-              ...responseMessage,
-              chat_id: id,
-              created_at: timestamp,
-            }, 0)
+            // TODO: Queue the AI response if persistence fails
           }
         },
         
