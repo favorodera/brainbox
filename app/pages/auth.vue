@@ -88,7 +88,7 @@
 const { auth } = useSupabaseClient()
 const user = useSupabaseUser()
 
-const redirectTo = import.meta.dev ? 'http://localhost:3000/callback' : 'https://mydocsai.vercel.app/callback'
+const redirectTo = import.meta.dev ? 'http://localhost:3000/callback' : 'https://brainboxaichat.vercel.app/callback'
 
 watch(user, () => {
   if (user.value) {

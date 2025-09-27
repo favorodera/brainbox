@@ -1,7 +1,7 @@
 import { openDB } from 'idb'
 import type { UIMessageExtension, QueuedMessage } from '../types/ai'
 
-const DB_NAME = 'my_docs_ai_chat_app'
+const DB_NAME = 'brainbox'
 const STORE_NAME = 'retry_queue'
 
 let retryInterval: NodeJS.Timeout | null = null
