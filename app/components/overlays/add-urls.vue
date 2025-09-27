@@ -2,7 +2,7 @@
 <template>
 
   <UModal
-    :close="{ onClick: () => emit('close', false) }"
+    :close="{ onClick: () => emit('close', false), disabled: status === 'pending' }"
     title="Add New URLs"
     description="Add new URLs for personalization."
     :ui="{

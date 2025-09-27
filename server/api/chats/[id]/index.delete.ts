@@ -1,4 +1,4 @@
-// GET /api/chats/:id → returns chat content if owned by requester
+// DELETE /api/chats/:id → deletes chat if owned by requester
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import { z } from 'zod'
 
@@ -10,7 +10,6 @@ const schema = z.object({
 export default defineEventHandler(async (event) => {
   try {
     const user = await serverSupabaseUser(event)
-
     if (!user) {
       throw createError({
         statusCode: 401,
@@ -19,7 +18,6 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Validate and parse route params
     const validate = await getValidatedRouterParams(event, schema.safeParse)
 
     if (validate.error) {
@@ -32,52 +30,23 @@ export default defineEventHandler(async (event) => {
     }
 
     const { id } = validate.data
+
     const client = await serverSupabaseClient<Database>(event)
 
-    //  Check if chat exists and belongs to user
-    const { data: chat, error: chatError } = await client
+    const { error } = await client
       .from('chats')
-      .select('id')
+      .delete()
       .match({ id, owner_id: user.id })
-      .single()
 
-    if (chatError) {
+    if (error) {
       throw createError({
         statusCode: 500,
-        statusMessage: chatError.code,
-        message: chatError.message,
+        statusMessage: error.code,
+        message: error.message,
       })
     }
 
-    if (!chat) {
-      throw createError({
-        statusCode: 404,
-        statusMessage: 'NOT_FOUND',
-        message: 'Chat not found',
-        fatal: true,
-      })
-    }
-
-    //  Fetch messages only if chat exists
-    const { data: messages, error: messagesError } = await client
-      .from('messages')
-      .select('id, role, parts')
-      .match({ chat_id: chat.id, owner_id: user.id })
-      .order('created_at', { ascending: true })
-
-    if (messagesError) {
-      throw createError({
-        statusCode: 500,
-        statusMessage: messagesError.code,
-        message: messagesError.message,
-      })
-    }
-
-    return {
-      id: chat.id,
-      messages,
-    }
-
+    return 'OK'
   } catch (error) {
     return getError(error)
   }

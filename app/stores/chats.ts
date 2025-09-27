@@ -12,7 +12,6 @@ export const useChatsStore = createStore('chats-store', ({ request, state }) => 
     '/api/chats/',
     {
       signal,
-      cache: 'force-cache',
       method: 'GET',
       headers: useRequestHeaders(['cookie']),
     },

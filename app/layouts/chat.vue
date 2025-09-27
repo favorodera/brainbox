@@ -55,14 +55,22 @@
           :ui="{ link: 'overflow-hidden' }"
           :unmount-on-hide="false"
         >
-          <template #chat-trailing>
-            <UButton
-              icon="lucide:trash-2"
-              color="error"
-              variant="ghost"
-              size="xs"
-              tabindex="-1"
-            />
+          <template #chat-trailing="{ item }">
+            <div class="-mr-1.5 flex transition-transform group-hover:translate-x-0 lg:translate-x-full">
+              <UButton
+                icon="lucide:trash-2"
+                color="error"
+                variant="ghost"
+                size="xs"
+                tabindex="-1"
+                square
+                @click.stop.prevent="deleteChatConfirmationModal.open({
+                  chatTitle: (item as any).label,
+                  chatId: (item as any).id,
+                })"
+              />
+            </div>
+
           </template>
         </UNavigationMenu>
 
@@ -100,8 +108,12 @@
 </template>
 
 <script setup lang="ts">
+import { LazyOverlaysDeleteChatConfirmation } from '#components'
 import type { CommandPaletteGroup, CommandPaletteItem, NavigationMenuItem } from '@nuxt/ui'
 
+const overlay = useOverlay()
+
+const deleteChatConfirmationModal = overlay.create(LazyOverlaysDeleteChatConfirmation)
 
 const isCommandPaletteOpen = ref(false)
 
@@ -112,6 +124,8 @@ const { data: chats } = await useChatsStore('chats')
 const chatsList = computed(() => chats.value || [])
 
 const commandPaletteGroups = computed<CommandPaletteGroup<CommandPaletteItem>[]>(() => {
+  if (!chatsList.value.length) return []
+
   return [
     {
       id: 'chats',
@@ -131,18 +145,23 @@ const commandPaletteGroups = computed<CommandPaletteGroup<CommandPaletteItem>[]>
   ]
 })
 
-const navigationMenuItems = computed<NavigationMenuItem[]>(() => [
-  {
-    id: 'label-chats',
-    label: 'Chats',
-    type: 'label' as const,
-  },
-  ...chatsList.value.map(chat => ({
-    ...chat,
-    slot: 'chat' as const,
-    icon: undefined,
-    class: chat.label === 'Untitled' ? 'text-muted' : '',
-  })),
-])
+const navigationMenuItems = computed<NavigationMenuItem[]>(() => {
+  if (!chatsList.value.length) return []
+
+  return [
+    {
+      id: 'label-chats',
+      label: 'Chats',
+      type: 'label' as const,
+    },
+    ...chatsList.value.map(chat => ({
+      ...chat,
+      slot: 'chat' as const,
+      icon: undefined,
+      class: chat.label === 'Untitled' ? 'text-muted' : '',
+    })),
+  ]
+})
+
 
 </script>

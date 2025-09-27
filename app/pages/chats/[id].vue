@@ -176,7 +176,6 @@ const components = {
 
 const { data, status, error, execute } = await useFetch<{ id: string, messages: UIMessage[], title: string }>(`/api/chats/${route.params.id}`, {
   headers: useRequestHeaders(['cookie']),
-  cache: 'force-cache',
   method: 'GET',
   key: `chat-${route.params.id}`,
   watch: [route],

@@ -68,6 +68,8 @@ const { error, error_description } = useRoute().query
 watch(user, () => {
   if (user.value) {
     return navigateTo(pluck() || '/')
+  } else {
+    return navigateTo('/auth')
   }
 }, { immediate: true })
 </script>

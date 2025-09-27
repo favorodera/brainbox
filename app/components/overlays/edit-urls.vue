@@ -1,7 +1,7 @@
 <!-- Modal form to edit existing personalization URLs with change detection -->
 <template>
   <UModal
-    :close="{ onClick: () => emit('close', false) }"
+    :close="{ onClick: () => emit('close', false), disabled: status === 'pending' }"
     title="Edit URLs"
     description="Edit the URLs below. Make your changes and save."
     :ui="{
@@ -57,6 +57,7 @@
         label="Cancel"
         color="neutral"
         variant="soft"
+        :loading="status === 'pending'"
         block
         @click="emit('close', false)"
       />

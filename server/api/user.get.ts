@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
 
     const { error, data } = await client
       .from('users')
-      .select('id,name, avatar, email')
+      .select('name, avatar, email')
       .eq('id', user.id)
       .single()
 

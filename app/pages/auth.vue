@@ -10,37 +10,46 @@
 
         <UAuthForm
           title="Login or Sign Up"
-          :providers="[
-            {
-              label: 'Continue with Google',
-              icon: 'simple-icons:google',
-              variant: 'soft',
-              size: 'lg',
-              onClick(){
-                auth.signInWithOAuth({
-                  provider: 'google',
-                  options: {
-                    redirectTo,
-                  },
-                })
-              },
-            },
-            {
-              label: 'Continue with GitHub',
-              icon: 'simple-icons:github',
-              variant: 'soft',
-              size: 'lg',
-              onClick(){
-                auth.signInWithOAuth({
-                  provider: 'github',
-                  options: {
-                    redirectTo,
-                  },
-                })
-              },
-            },
-          ]"
         >
+
+          <template #providers>
+
+            <UChip
+              :show="get() === 'google'"
+              color="success"
+              size="sm"
+              inset
+              class="w-full"
+            >
+              <UButton
+                label="Continue with Google"
+                icon="simple-icons:google"
+                variant="soft"
+                size="lg"
+                block
+                @click="authenticate('google')"
+              />
+            </UChip>
+
+
+            <UChip
+              :show="get() === 'github'"
+              color="success"
+              size="sm"
+              inset
+              class="w-full"
+            >
+              <UButton
+                label="Continue with GitHub"
+                block
+                icon="simple-icons:github"
+                variant="soft"
+                size="lg"
+                @click="authenticate('github')"
+              />
+            </UChip>
+            
+          </template>
 
           <template #leading>
             <Logo
@@ -85,8 +94,14 @@
 </template>
 
 <script setup lang="ts">
+import type { Provider } from '@supabase/auth-js'
+
+const { set, get } = useLastAuthMethod()
+
 const { auth } = useSupabaseClient()
 const user = useSupabaseUser()
+
+const toast = useToast()
 
 const redirectTo = import.meta.dev ? 'http://localhost:3000/callback' : 'https://brainboxaichat.vercel.app/callback'
 
@@ -95,4 +110,32 @@ watch(user, () => {
     return navigateTo('/callback')
   }
 }, { immediate: true })
+
+async function authenticate(provider: Provider) {
+  try {
+    const { data, error } = await auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo,
+      },
+    })
+
+    if (error) {
+      return toast.add({
+        title: error.message,
+        color: 'error',
+        icon: 'lucide:x',
+      })
+    }
+
+    set(data.provider)
+
+  } catch {
+    return toast.add({
+      title: 'An unexpected error occurred',
+      color: 'error',
+      icon: 'lucide:x',
+    })
+  }
+}
 </script>

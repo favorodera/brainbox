@@ -24,7 +24,9 @@
 <script lang="ts" setup>
 const colorMode = useColorMode()
 
-const color = computed(() => colorMode.value === 'dark' ? '#090909' : 'white')
+const themeColor = computed(() =>
+  colorMode.value === 'dark' ? '#000000' : '#ffffff',
+)
 
 useSeoMeta({
   titleTemplate: 'Brainbox %separator %s',
@@ -40,14 +42,37 @@ useHead({
   meta: [
     { charset: 'utf-8' },
     { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-    { key: 'theme-color', name: 'theme-color', content: color },
+    {
+      name: 'theme-color',
+      content: '#ffffff',
+      media: '(prefers-color-scheme: light)',
+    },
+    {
+      name: 'theme-color',
+      content: '#000000',
+      media: '(prefers-color-scheme: dark)',
+    },
+
+    {
+      name: 'theme-color',
+      content: themeColor,
+      tagPriority: 1,
+    },
+
+    {
+      name: 'msapplication-navbutton-color',
+      content: themeColor,
+    },
+    {
+      name: 'apple-mobile-web-app-status-bar-style',
+      content: 'black-translucent',
+    },
   ],
   link: [
     { rel: 'icon', href: '/favicon-dark.ico', media: '(prefers-color-scheme:dark)' },
     { rel: 'icon', href: '/favicon-light.ico', media: '(prefers-color-scheme:light)' },
+    { rel: 'canonical', href: 'https://brainboxaichat.vercel.app/' },
   ],
 })
 
-
 </script>
-

@@ -1,7 +1,10 @@
 <!-- Confirmation modal to delete selected personalization URLs -->
 <template>
   <UModal
-    :close="{ onClick: () => emit('close', false) }"
+    :close="{
+      onClick: () => emit('close', false),
+      disabled: status === 'pending',
+    }"
     title="Delete URLs"
     description="Are you sure you want to delete the following URLs? This action cannot be undone."
     :ui="{
@@ -39,6 +42,7 @@
         label="Cancel"
         color="neutral"
         variant="soft"
+        :disabled="status === 'pending'"
         block
         @click="emit('close', false)"
       />
