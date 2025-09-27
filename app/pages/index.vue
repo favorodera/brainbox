@@ -1,21 +1,24 @@
 <template>
 
   <div class="flex w-full">
+
     <UDashboardPanel
       id="home"
       :ui="{ body: 'p-0 sm:p-0' }"
     >
+
       <template #header>
         <Navbar />
       </template>
 
       <template #body>
 
-        <UContainer class="flex flex-1 flex-col justify-center gap-4 py-8 sm:gap-6">
+        <UContainer class="flex max-w-3xl flex-1 flex-col justify-center gap-4 py-8 sm:gap-6">
+
           <h1 class="text-3xl font-bold text-highlighted sm:text-4xl">
             How can I help you today?
           </h1>
-        
+
           <UChatPrompt
             id="new-chat-prompt"
             v-model="prompt"
@@ -25,45 +28,30 @@
             autofocus
             autoresize
             :maxrows="6"
-            :disabled="status === 'pending' || status === 'success'"
+            :disabled="idlePromptBox"
             :ui="{
-              footer: 'justify-between gap-4',
+              body: 'items-end',
             }"
             @submit="execute()"
           >
 
-            <template #footer>
-              <USelectMenu
-                id="model-select"
-                v-model="model"
-                :items="models"
-                :icon="selectedModel?.icon"
-                variant="ghost"
-                value-key="value"
-                :search-input="{
-                  placeholder: 'Search models...',
-                }"
-                class="w-min"
-                :ui="{
-                  leadingIcon: 'size-4',
-                  trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200',
-                }"
-              />
-  
-              <UButton
-                type="submit"
-                icon="lucide:send"
-                :loading="status === 'pending' || status === 'success'"
-                :disabled="status === 'pending' || status === 'success' || prompt.trim() === ''"
-              />
-            </template>
+            <UButton
+              type="submit"
+              icon="lucide:send"
+              :loading="idlePromptBox"
+              :disabled="idlePromptBox || prompt.trim() === ''"
+            />
 
           </UChatPrompt>
+
         </UContainer>
 
       </template>
+      
 
     </UDashboardPanel>
+
+
   </div>
 
 </template>
@@ -73,13 +61,9 @@ definePageMeta({
   layout: 'chat',
 })
 
-const toast = useToast()
-
-const { model, models } = useAiModels()
-
-const selectedModel = useArrayFind(models, selected => selected.value === model.value)
-
 const { initPrompt } = useChatsStore()
+
+const toast = useToast()
 
 const prompt = ref('')
 
@@ -104,4 +88,9 @@ const { status, execute } = useRequest<string>('/api/chats/', {
     },
   },
 }, false)
+
+/** Idles prompt box awaiting redirect */
+const idlePromptBox = computed(() => {
+  return status.value === 'pending' || status.value === 'success'
+})
 </script>

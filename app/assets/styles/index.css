@@ -9,15 +9,15 @@
 
 :root {
   --ui-primary: black;
-  --ui-container: var(--container-3xl);
+  --ui-container: var(--container-8xl);
 }
 
 
 .dark {
-  /* --ui-bg: var(--ui-color-neutral-950);
+  --ui-bg: var(--ui-color-neutral-950);
   --ui-bg-muted: var(--ui-color-neutral-900);
   --ui-bg-elevated: var(--ui-color-neutral-900);
-  --ui-bg-accented: var(--ui-color-neutral-800); */
+  --ui-bg-accented: var(--ui-color-neutral-800);
 
   --ui-primary: white;
 }
@@ -37,37 +37,6 @@ body {
   width: 100%;
   display: flex;
   flex-direction: column;
-}
-
-/* Global Scrollbar Styles  */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--ui-color-neutral-400);
-  border-radius: 3px;
-  transition: background-color 0.2s ease;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--ui-color-neutral-500);
-}
-
-::-webkit-scrollbar-corner {
-  background: transparent;
-}
-
-/* Global Scrollbar Styles - Firefox */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--ui-color-neutral-400) transparent;
 }
 
 ::-ms-reveal {

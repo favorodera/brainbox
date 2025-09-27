@@ -2,22 +2,22 @@
 <template>
 
   <div
-    class="flex items-center gap-2 p-1.5"
+    class="flex items-center gap-1 p-1.5"
     :class="ui.root"
   >
 
     <UIcon
       name="custom:logo"
-      class="size-5 shrink-0 text-default"
+      class="size-5 shrink-0 [&>path]:stroke-black dark:[&>path]:stroke-white"
       :class="ui.icon"
     />
 
     <p
       v-if="withText"
-      class=" w-max font-medium"
+      class=" w-max font-mono font-medium"
       :class="ui.text"
     >
-      MyDocs AI
+      Brainbox
     </p>
 
   </div>

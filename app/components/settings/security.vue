@@ -1,3 +1,4 @@
+<!-- Security settings: sign out the current user -->
 <template>
 
   <div class="space-y-2">

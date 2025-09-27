@@ -22,25 +22,32 @@
 </template>
 
 <script lang="ts" setup>
+const colorMode = useColorMode()
+
+const color = computed(() => colorMode.value === 'dark' ? '#090909' : 'white')
+
 useSeoMeta({
-  titleTemplate: 'MyDocs AI %separator %s',
+  titleTemplate: 'Brainbox %separator %s',
   twitterCard: 'summary_large_image',
   twitterSite: '@favorodera',
   twitterCreator: '@favorodera',
   colorScheme: 'dark light',
   author: 'Favour Emeka',
-  themeColor: [
-    { content: '#090909', media: '(prefers-color-scheme: dark)' },
-    { content: 'white', media: '(prefers-color-scheme: light)' },
-  ],
-  viewport: 'width=device-width, initial-scale=1',
 })
 
 useHead({
   htmlAttrs: { lang: 'en', dir: 'ltr' },
+  meta: [
+    { charset: 'utf-8' },
+    { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+    { key: 'theme-color', name: 'theme-color', content: color },
+  ],
   link: [
-    { rel: 'icon', href: '/logo.svg' },
+    { rel: 'icon', href: '/favicon-dark.ico', media: '(prefers-color-scheme:dark)' },
+    { rel: 'icon', href: '/favicon-light.ico', media: '(prefers-color-scheme:light)' },
   ],
 })
+
+
 </script>
 

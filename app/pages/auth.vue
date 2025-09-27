@@ -10,8 +10,21 @@
 
         <UAuthForm
           title="Login or Sign Up"
-          description="Access all the features of MyDocs AI"
           :providers="[
+            {
+              label: 'Continue with Google',
+              icon: 'simple-icons:google',
+              variant: 'soft',
+              size: 'lg',
+              onClick(){
+                auth.signInWithOAuth({
+                  provider: 'google',
+                  options: {
+                    redirectTo,
+                  },
+                })
+              },
+            },
             {
               label: 'Continue with GitHub',
               icon: 'simple-icons:github',
@@ -28,9 +41,20 @@
             },
           ]"
         >
+
+          <template #leading>
+            <Logo
+              :with-text="false"
+              class="mx-auto w-fit"
+              :ui="{
+                icon: '!size-10',
+              }"
+            />
+          </template>
       
           <template #footer>
             By continuing, you agree to our Terms of Service and Privacy Policy
+
           </template>
         </UAuthForm>
         

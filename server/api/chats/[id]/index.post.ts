@@ -13,13 +13,12 @@ const paramsSchema = z.object({
 
 // Request body validation schema
 const bodySchema = z.object({
-  model: z.custom<AIModel>(),
   messages: z.array(z.custom<UIMessage>()),
 })
 
 // POST /api/chats/:id → validates, streams model output, saves messages
 export default defineLazyEventHandler(() => {
-
+  
   const { googleGenerativeAiKey } = useRuntimeConfig()
 
   if (!googleGenerativeAiKey) {
@@ -34,6 +33,8 @@ export default defineLazyEventHandler(() => {
   const google = createGoogleGenerativeAI({
     apiKey: googleGenerativeAiKey,
   })
+
+  const model = google('gemini-2.5-flash')
 
   return defineEventHandler(async (event) => {
 
@@ -62,10 +63,10 @@ export default defineLazyEventHandler(() => {
           message: issue ? `${issue.path}: ${issue.message}` : 'Invalid query parameters',
         })
       }
-
+ 
       // Validate request body
       const validateBody = await readValidatedBody(event, bodySchema.safeParse)
-
+ 
       if (validateBody.error) {
         const issue = validateBody.error.issues[0]
         throw createError({
@@ -76,15 +77,13 @@ export default defineLazyEventHandler(() => {
       }
 
       const { id } = validateParams.data
+      const { messages } = validateBody.data
 
-      const { messages, model } = validateBody.data
-
-      // Supabase client scoped to this request
       const client = await serverSupabaseClient<Database>(event)
 
       const { addToQueue } = indexDb()
 
-      const { error, data } = await client
+      const { error, data: chat } = await client
         .from('chats')
         .select('id, title')
         .match({ id, owner_id: user.id })
@@ -98,7 +97,7 @@ export default defineLazyEventHandler(() => {
         })
       }
 
-      if (!data) {
+      if (!chat) {
         throw createError({
           statusCode: 404,
           statusMessage: 'NOT_FOUND',
@@ -130,22 +129,19 @@ export default defineLazyEventHandler(() => {
         }
       }
 
-      // Map UI model value (e.g. google/gemini-2.5-flash) to provider model id
-      const modelRefined = google(model.split('/')[1])
-
-      // Stream model tokens to the UI and persist messages on finish
       const stream = createUIMessageStream({
-        execute: ({ writer }) => {
+        execute({ writer }) {
+
           const result = streamText({
-            model: modelRefined,
+            model,
             system: 'You are a helpful assistant that can answer questions and help.',
             messages: convertToModelMessages(messages),
           })
-    
-          writer.merge(result.toUIMessageStream())
-        },
-        onFinish: async ({ responseMessage }) => {
 
+          writer.merge(result.toUIMessageStream())
+          
+        },
+        async onFinish({ responseMessage }) {
           try {
             await client
               .from('messages')
@@ -156,41 +152,55 @@ export default defineLazyEventHandler(() => {
                 created_at: timestamp,
                 parts: responseMessage.parts as unknown as Json[],
               })
-
-            if (!data.title) {
+        
+            if (!chat.title) {
               try {
                 const { text } = await generateText({
                   model: google('gemini-2.5-flash'),
-                  system: `You are a title generator for a chat:
-                        - Generate a short title based on the first user's message
-                        - The title should be less than 30 characters long
-                        - The title should be a summary of the user's message
-                        - Do not use quotes (' or ") or colons (:) or any other punctuation
-                        - Do not use markdown, just plain text`,
+                  system: `
+                  Create a short title (3 to 5 words, max 30 characters) based only on the user's first message.
+                  
+                  Rules:
+                  - No punctuation, no markdown, no filler words.
+                  - Use natural word order so it sounds like a real topic.
+                  - Ignore emojis, numbers, or symbols.
+                  - If the first message is just a greeting (hello, hi, hey, how are you, etc.), return "Greetings".
+                  - If it is just a farewell (bye, goodbye, goodnight, see you later, etc.), return "Farewell".
+                  - If the message is empty, meaningless, or provides no useful context, return "General Chat".
+                  - Otherwise, make a concise but clear title capturing the main subject.
+                  
+                  Examples:
+                  "Whats football all about" → "Football Basics"
+                  "Tell me how rockets work" → "Rocket Science Overview"
+                  "How are you" → "Greetings"
+                  "Bye for now" → "Farewell"
+                  "???" → "General Chat"
+                  `,
                   prompt: JSON.stringify(messages[0]),
                 })
-          
+                
+                const normalized = text.replace(/:/g, '').split('\n')[0].trim()
+        
                 await client
                   .from('chats')
-                  .update({ title: text.replace(/:/g, '').split('\n')[0].trim() })
+                  .update({ title: normalized })
                   .match({ id, owner_id: user.id })
               } catch {
-                // Fail silently
+                // Fail silently on title
               }
             }
           } catch {
+            // Queue the AI response if persistence fails
             await addToQueue({
-              ...lastMessage,
+              ...responseMessage,
               chat_id: id,
               created_at: timestamp,
             }, 0)
           }
-    
-
         },
         
       })
-  
+
       return createUIMessageStreamResponse({
         stream,
       })
@@ -198,6 +208,7 @@ export default defineLazyEventHandler(() => {
     } catch (error) {
       return getError(error)
     }
+
 
   })
 

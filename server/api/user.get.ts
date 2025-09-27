@@ -15,7 +15,6 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Supabase client scoped to this request
     const client = await serverSupabaseClient<Database>(event)
 
     const { error, data } = await client

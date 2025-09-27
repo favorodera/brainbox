@@ -1,8 +1,7 @@
 <template>
 
-  <UDashboardGroup
-    unit="rem"
-  >
+  <UDashboardGroup unit="rem">
+
     <UDashboardSidebar
       v-if="user"
       collapsible
@@ -51,7 +50,7 @@
           :collapsed="collapsed"
           orientation="vertical"
           tooltip
-          :items="items"
+          :items="navigationMenuItems"
           popover
           :ui="{ link: 'overflow-hidden' }"
           :unmount-on-hide="false"
@@ -79,14 +78,19 @@
       v-model:open="isCommandPaletteOpen"
       :color-mode="false"
       placeholder="Search chats..."
-      :groups="[{
-        id: 'links',
-        items: [{
-          label: 'New chat',
-          to: '/',
-          icon: 'lucide:square-pen',
-        }],
-      }, ...groups]"
+      :groups="[
+        {
+          id: 'links',
+          items: [
+            {
+              label: 'New chat',
+              to: '/',
+              icon: 'lucide:square-pen',
+            },
+          ],
+        },
+        ...commandPaletteGroups,
+      ]"
     />
 
     <slot />
@@ -95,41 +99,50 @@
 
 </template>
 
-
 <script setup lang="ts">
+import type { CommandPaletteGroup, CommandPaletteItem, NavigationMenuItem } from '@nuxt/ui'
+
 
 const isCommandPaletteOpen = ref(false)
 
 const user = useSupabaseUser()
 
-const { data } = await useChatsStore('chats')
+const { data: chats } = await useChatsStore('chats')
 
-const { groups } = groupChats(data)
+const chatsList = computed(() => chats.value || [])
 
-const { startRetryWorker, processQueue, stopRetryWorker } = indexDb()
+const commandPaletteGroups = computed<CommandPaletteGroup<CommandPaletteItem>[]>(() => {
+  return [
+    {
+      id: 'chats',
+      items: [
+        {
+          id: 'label-chats',
+          label: 'Chats',
+          type: 'label' as const,
+        },
+        ...chatsList.value.map(chat => ({
+          ...chat,
+          slot: 'chat' as const,
+          class: chat.label === 'Untitled' ? 'text-muted' : '',
+        })),
+      ],
+    },
+  ]
+})
 
-const items = computed(() => groups.value?.flatMap((group) => {
-  return [{
-    label: group.label,
+const navigationMenuItems = computed<NavigationMenuItem[]>(() => [
+  {
+    id: 'label-chats',
+    label: 'Chats',
     type: 'label' as const,
-  }, ...group.items.map(item => ({
-    ...item,
+  },
+  ...chatsList.value.map(chat => ({
+    ...chat,
     slot: 'chat' as const,
     icon: undefined,
-    class: item.label === 'Untitled' ? 'text-muted' : '',
-  }))]
-}))
+    class: chat.label === 'Untitled' ? 'text-muted' : '',
+  })),
+])
 
-onMounted(async () => {
-  await nextTick()
-
-  useEventListener('online', () => {
-    startRetryWorker()
-    processQueue()
-  })
-
-  useEventListener('offline', () => {
-    stopRetryWorker()
-  })
-})
 </script>

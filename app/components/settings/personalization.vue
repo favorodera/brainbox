@@ -32,7 +32,6 @@
 <script setup lang="ts">
 import { LazyOverlaysManageUrls } from '#components'
 
-// Overlay for the Manage URLs modal
 const overlay = useOverlay()
 const manageUrlsModal = overlay.create(LazyOverlaysManageUrls)
 </script>

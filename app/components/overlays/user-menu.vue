@@ -28,22 +28,18 @@
 
 <script setup lang="ts">
 import type { DropdownMenuItem } from '@nuxt/ui'
-
 import { LazyOverlaysSignoutConfirmation, LazyOverlaysSettings } from '#components'
 
 defineProps<{
   collapsed?: boolean
 }>()
 
-// Overlay factory to open sign-out confirmation and settings modals
+const { data: user } = await useUserStore('user')
+
 const overlay = useOverlay()
 const signOutConfirmationModal = overlay.create(LazyOverlaysSignoutConfirmation)
 const settingsModal = overlay.create(LazyOverlaysSettings)
 
-// Load current user's profile for avatar and name
-const { data: user } = await useUserStore('user')
-
-// Menu sections: account info + actions
 const dropdownMenuItems = ref<DropdownMenuItem[][]>([
   
   [

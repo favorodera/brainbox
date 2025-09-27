@@ -3,6 +3,7 @@ import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import { z } from 'zod'
 
 const schema = z.object({
+  /** Chat ID */
   id: z.string(),
 })
 
@@ -20,6 +21,7 @@ export default defineEventHandler(async (event) => {
 
     // Validate and parse route params
     const validate = await getValidatedRouterParams(event, schema.safeParse)
+
     if (validate.error) {
       const issue = validate.error.issues[0]
       throw createError({
@@ -33,21 +35,21 @@ export default defineEventHandler(async (event) => {
     const client = await serverSupabaseClient<Database>(event)
 
     // Fetch chat
-    const { data: chat, error: chatError } = await client
-      .from('chats')
-      .select('id, title, created_at')
-      .match({ id, owner_id: user.id })
-      .maybeSingle()
+    const { data, error } = await client
+      .from('messages')
+      .select('id, role, created_at, chat_id, parts, role')
+      .match({ chat_id: id, owner_id: user.id })
+      .order('created_at', { ascending: true })
 
-    if (chatError) {
+    if (error) {
       throw createError({
         statusCode: 500,
-        statusMessage: chatError.code,
-        message: chatError.message,
+        statusMessage: error.code,
+        message: error.message,
       })
     }
 
-    if (!chat) {
+    if (!data) {
       throw createError({
         statusCode: 404,
         statusMessage: 'NOT_FOUND',
@@ -55,25 +57,17 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Fetch messages for this chat
-    const { data: messages, error: msgError } = await client
-      .from('messages')
-      .select('id, role, parts')
-      .match({ chat_id: id, owner_id: user.id })
-      .order('created_at', { ascending: true })
-
-    if (msgError) {
-      throw createError({
-        statusCode: 500,
-        statusMessage: msgError.code,
-        message: msgError.message,
-      })
-    }
+    const messages = data.map(message => ({
+      id: message.id,
+      role: message.role,
+      parts: message.parts,
+    }))
 
     return {
-      ...chat,
-      messages: messages ?? [],
+      id,
+      messages,
     }
+
   } catch (error) {
     return getError(error)
   }

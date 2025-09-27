@@ -24,27 +24,7 @@
 
     <USeparator />
 
-    <div class="space-y-2">
-
-      <div class="flex justify-between">
-        <p>
-          Plan and Usage
-        </p>
-
-        <UBadge
-          label="PRO"
-          color="success"
-          variant="soft"
-        />
-      </div>
-
-      <UProgress
-        size="sm"
-        color="neutral"
-        :model-value="5"
-      />
-
-    </div>
+    <div class="space-y-2" />
 
   </div>
 
@@ -52,7 +32,6 @@
 </template>
 
 <script setup lang="ts">
-// Load user profile to display name, email, and avatar
 const { data: user } = await useUserStore('user')
 </script>
 

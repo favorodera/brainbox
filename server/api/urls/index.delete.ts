@@ -41,7 +41,6 @@ export default defineEventHandler(async (event) => {
 
     const { urls } = validate.data
 
-    // Supabase client scoped to this request
     const client = await serverSupabaseClient<Database>(event)
 
     // Use Postgres function to delete URLs atomically

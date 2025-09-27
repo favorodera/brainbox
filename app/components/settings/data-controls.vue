@@ -24,6 +24,22 @@
 
     </div>
 
+    <USeparator />
+
+    <div class="flex items-center justify-between">
+
+      <p>
+        Delete all URLs
+      </p>
+
+      <UButton
+        color="error"
+        variant="link"
+        label="Delete all"
+      />
+
+    </div>
+
 
   </div>
 

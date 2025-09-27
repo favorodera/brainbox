@@ -4,14 +4,13 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineNuxtConfig({
   extends: ['@favorodera/nuxt-helper'],
   modules: [
-    '@vaxee/nuxt',
     '@nuxt/ui',
     '@nuxtjs/mdc',
     '@vueuse/nuxt',
-    '@nuxtjs/seo',
-    '@nuxt/image',
     '@nuxt/eslint',
     '@nuxtjs/supabase',
+    '@vaxee/nuxt',
+    '@nuxtjs/seo',
   ],
   imports: {
     dirs: ['./app/stores'],
@@ -35,7 +34,6 @@ export default defineNuxtConfig({
     },
   },
   runtimeConfig: {
-    vercelAIGatewayKey: '',
     supabaseServiceKey: '',
     googleGenerativeAiKey: '',
     public: {

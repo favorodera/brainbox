@@ -1,4 +1,4 @@
-<!-- Dashboard navbar showing auth-aware actions and help menu -->
+<!-- Dashboard navbar showing auth-aware actions -->
 <template>
   <UDashboardNavbar
     class="border-none"
@@ -36,21 +36,6 @@
           variant="soft"
           to="/auth"
         />
-
-        <UDropdownMenu
-          :items="[
-            { label: 'Plans and Pricing', to: '', target: '_blank' },
-            { type: 'separator' },
-            { label: 'Documentation', to: '', target: '_blank' },
-            { label: 'Privacy Policy', to: '', target: '_blank' },
-          ]"
-        >
-          <UButton
-            color="neutral"
-            variant="soft"
-            icon="lucide:circle-question-mark"
-          />
-        </UDropdownMenu>
       </template>
             
     </template>
@@ -59,7 +44,6 @@
 </template>
 
 <script setup lang="ts">
-// Reactive Supabase user used to toggle navbar items
 const user = useSupabaseUser()
 </script>
 

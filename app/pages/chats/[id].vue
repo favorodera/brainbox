@@ -12,11 +12,10 @@
       </template>
 
       <template #body>
-        <UContainer class="grid flex-1 grid-cols-1 gap-4 sm:gap-6">
-
+        <UContainer class="grid max-w-3xl flex-1 grid-cols-1 gap-4 sm:gap-6">
 
           <div
-            v-if="status === 'fetching'"
+            v-if="status === 'pending'"
             class="flex flex-col items-center justify-center gap-2"
           >
             <UIcon
@@ -43,7 +42,7 @@
               label="Retry"
               variant="soft"
               size="sm"
-              @click="execute(route.params.id as string)"
+              @click="execute()"
             />
           </div>
 
@@ -54,16 +53,6 @@
               should-auto-scroll
               :messages="chat.messages"
               :status="chat.status"
-              :assistant="{
-                actions: [
-                  {
-                    label: 'Copy',
-                    icon: copied ? 'lucide:copy-check' : 'lucide:copy',
-                    onClick: handleCopy,
-                    class: 'opacity-100',
-                  },
-                ],
-              }"
               class="pb-4 sm:pb-6 lg:pt-(--ui-header-height)"
               :ui="{
                 indicator: 'h-auto block *:rounded-none *:bg-transparent [&>*:nth-child(1)]:animate-none *:size-auto [&>*:nth-child(3)]:animate-none [&>*:nth-child(4)]:animate-none',
@@ -82,6 +71,26 @@
                 />
               </template>
 
+              <template #actions="{ message }">
+                <template
+                  v-for="(part, index) in message.parts"
+                  :key="`${part.type}-${index}-${message.id}`"
+                >
+  
+                  <UTooltip text="Copy">
+                    <UButton
+                      v-if="part.type === 'text' && part.state === 'done'"
+                      color="neutral"
+                      variant="link"
+                      :icon="copied ? 'lucide:copy-check' : 'lucide:copy'"
+                      @click="handleCopy($event, message)"
+                    />
+                  </UTooltip>
+
+                </template>
+
+              </template>
+
               <template #content="{ message }">
 
                 <div class="space-y-4">
@@ -94,22 +103,17 @@
                     :parser-options="{ highlight: false, toc: false }"
                   />
 
-                  <template
-                    v-for="(part, index) in message.parts"
-                    :key="`${part.type}-${index}-${message.id}`"
-                  >
-                    <UButton
-                      v-if="part.type === 'text' && part.state === 'streaming'"
-                      class="px-0"
-                      color="neutral"
-                      variant="link"
-                      loading
-                      loading-icon="lucide:loader"
-                      :ui="{ label: 'animate-pulse text-muted' }"
-                      label="Generating..."
-                    />
+                  <UButton
+                    v-if="message.role === 'assistant' && chat.status !== 'ready' && chat.status !== 'error'"
+                    class="px-0"
+                    color="neutral"
+                    variant="link"
+                    loading
+                    loading-icon="lucide:loader"
+                    :ui="{ label: 'animate-pulse text-muted' }"
+                    label="Generating..."
+                  />
 
-                  </template>
 
                 </div>
 
@@ -126,37 +130,18 @@
                 autoresize
                 :maxrows="6"
                 :ui="{
-                  footer: 'justify-between gap-4',
+                  body: 'items-end',
                 }"
                 @submit="handleSubmit()"
               >
-
-                <template #footer>
-                  <USelectMenu
-                    id="model-select"
-                    v-model="model"
-                    :items="models"
-                    :icon="selectedModel?.icon"
-                    variant="ghost"
-                    value-key="value"
-                    :search-input="{
-                      placeholder: 'Search models...',
-                    }"
-                    class="w-min"
-                    :ui="{
-                      leadingIcon: 'size-4',
-                      trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200',
-                    }"
-                  />
   
-                  <UChatPromptSubmit
-                    :disabled="prompt.trim() === '' && chat.status !== 'error'"
-                    :status="chat.status"
-                    icon="lucide:send"
-                    @stop="chat.stop"
-                    @reload="chat.regenerate"
-                  />
-                </template>
+                <UChatPromptSubmit
+                  :disabled="prompt.trim() === '' && chat.status !== 'error'"
+                  :status="chat.status"
+                  icon="lucide:send"
+                  @stop="chat.stop"
+                  @reload="chat.regenerate"
+                />
 
               </UChatPrompt>
             </div>
@@ -180,6 +165,7 @@ import type { DefineComponent } from 'vue'
 
 definePageMeta({
   layout: 'chat',
+  title: 'Chat',
 })
 
 const route = useRoute()
@@ -188,14 +174,17 @@ const components = {
   pre: ProseStreamPre as unknown as DefineComponent,
 }
 
-const { chats: { refresh }, chat: { data, execute, status, error }, initPrompt } = useChatsStore()
+const { data, status, error, execute } = await useFetch<{ id: string, messages: UIMessage[], title: string }>(`/api/chats/${route.params.id}`, {
+  headers: useRequestHeaders(['cookie']),
+  cache: 'force-cache',
+  method: 'GET',
+  key: `chat-${route.params.id}`,
+  watch: [route],
+})
+
+const { chats: { refresh }, initPrompt } = useChatsStore()
 
 const prompt = ref('')
-
-await execute(route.params.id as string)
-
-const { model, models } = useAiModels()
-const selectedModel = useArrayFind(models, selected => selected.value === model.value)
 
 const toast = useToast()
 
@@ -221,9 +210,6 @@ const chat = new Chat({
   messages: data.value.messages,
   transport: new DefaultChatTransport({
     api: `/api/chats/${data.value.id}`,
-    body: {
-      model: model.value,
-    },
   }),
   onError(error) {
     toast.add({
@@ -260,5 +246,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-
+:deep(.group-hover\/message\:opacity-100) {
+  opacity:100
+}
 </style>

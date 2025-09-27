@@ -13,27 +13,23 @@
     "generate:supabase:types": "npx supabase gen types --lang=typescript --project-id jqzpmqexlwunpgdqybvs > ./shared/types/supabase.d.ts"
   },
   "dependencies": {
-    "@ai-sdk/gateway": "^1.0.25",
-    "@ai-sdk/google": "^2.0.15",
-    "@ai-sdk/vue": "^2.0.48",
+    "@ai-sdk/google": "^2.0.17",
+    "@ai-sdk/vue": "^2.0.54",
     "@favorodera/nuxt-helper": "^1.0.11",
-    "@nuxt/image": "^1.11.0",
-    "@nuxt/ui": "^4.0.0-alpha.1",
+    "@nuxt/ui": "^4.0.0",
     "@nuxtjs/mdc": "^0.17.4",
-    "@nuxtjs/seo": "^3.1.0",
+    "@nuxtjs/seo": "^3.2.2",
     "@nuxtjs/supabase": "^1.6.2",
-    "@tailwindcss/vite": "^4.1.13",
     "@vaxee/nuxt": "^0.12.1",
     "@vueuse/nuxt": "^13.9.0",
-    "ai": "^5.0.48",
-    "date-fns": "^4.1.0",
+    "ai": "^5.0.54",
     "idb": "^8.0.3",
-    "nuxt": "^4.1.1",
+    "nuxt": "^4.1.2",
     "shiki-stream": "^0.1.2",
     "tailwindcss": "^4.1.13",
     "vue": "^3.5.21",
     "vue-router": "^4.5.1",
-    "zod": "^4.1.8"
+    "zod": "^4.1.11"
   },
   "devDependencies": {
     "@favorodera/nuxt-eslint-config": "^1.1.0",
@@ -41,9 +37,9 @@
     "@iconify-json/lucide": "^1.2.68",
     "@iconify-json/simple-icons": "^1.2.53",
     "@nuxt/eslint": "^1.9.0",
-    "eslint": "^9.35.0",
+    "eslint": "^9.36.0",
     "eslint-plugin-tailwindcss": "^4.0.0-beta.0",
     "typescript": "^5.9.2",
-    "vue-tsc": "^3.0.7"
+    "vue-tsc": "^3.0.8"
   }
 }
