@@ -87,14 +87,10 @@ async function update(id: string, retries: number, nextAttempt: number) {
 
   const message = await storage.getItem(keyHelper(id))
 
-  console.log(message)
-
   if (message) {
     message.retries = retries
     message.nextAttempt = nextAttempt
     await storage.setItem(keyHelper(id), message)
-
-    console.log(await storage.getItem(keyHelper(id)))
   }
 
 }
