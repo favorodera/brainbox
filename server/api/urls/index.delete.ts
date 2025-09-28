@@ -1,8 +1,15 @@
-// Deletes URLs from the authenticated user's personalization list
+/**
+ * Deletes URLs from the authenticated user's personalization list.
+ *
+ * Route: DELETE /api/urls
+ * Auth: Required (Supabase session cookie)
+ * Body: { urls: Array<{ name: string; url: string }> }
+ * Response: 'OK'
+ */
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import { z } from 'zod'
 
-// Body validation schema for URL entries
+/** Body validation schema for URL entries */
 const schema = z.object({
   urls: z.array(
     z.object({
@@ -12,7 +19,9 @@ const schema = z.object({
   ),
 })
 
-// DELETE /api/urls → removes provided URLs via RPC
+/**
+ * Removes provided URLs via Postgres RPC for atomic updates.
+ */
 export default defineEventHandler(async (event) => {
 
   try {

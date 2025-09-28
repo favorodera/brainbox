@@ -1,7 +1,15 @@
-// Returns the authenticated user's personalization URLs array
+/**
+ * Returns the authenticated user's personalization URLs array.
+ *
+ * Route: GET /api/urls
+ * Auth: Required (Supabase session cookie)
+ * Response: Array<{ name: string; url: string }>
+ */
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 
-// GET /api/urls → fetches user's stored URLs from Supabase
+/**
+ * Fetches the user's stored URLs from Supabase.
+ */
 export default defineEventHandler(async (event) => {
 
   try {
@@ -32,6 +40,7 @@ export default defineEventHandler(async (event) => {
       })
     }
     
+    // Return the stored URLs array
     return data.urls
 
   } catch (error) {

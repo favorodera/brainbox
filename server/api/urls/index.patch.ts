@@ -1,8 +1,15 @@
-// Updates existing URLs in the authenticated user's personalization list
+/**
+ * Updates existing URLs in the authenticated user's personalization list.
+ *
+ * Route: PATCH /api/urls
+ * Auth: Required (Supabase session cookie)
+ * Body: { urls: Array<{ name: string; url: string }> }
+ * Response: 'OK'
+ */
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import { z } from 'zod'
 
-// Body validation schema for URL entries
+/** Body validation schema for URL entries */
 const schema = z.object({
   urls: z.array(
     z.object({
@@ -12,7 +19,9 @@ const schema = z.object({
   ),
 })
 
-// PATCH /api/urls → updates provided URLs via RPC
+/**
+ * Updates provided URLs via Postgres RPC for atomic updates.
+ */
 export default defineEventHandler(async (event) => {
 
   try {

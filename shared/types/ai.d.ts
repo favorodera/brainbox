@@ -1,13 +1,20 @@
 import type { UIMessage } from 'ai'
 
-/** Extended UIMessage for queuing in indexedDB */
+/**
+ * Extended UIMessage persisted to database.
+ * - `id`: message id (UUID)
+ * - `chat_id`: owning chat id
+ * - `created_at`: ISO timestamp
+ */
 export type UIMessageExtension = UIMessage & {
   id: string
   chat_id: string
   created_at: string
 }
   
-/** QueuedMessage in indexedDB */
+/**
+ * Message stored in IndexedDB for retry with scheduling metadata.
+ */
 export type QueuedMessage = UIMessageExtension & {
   retries: number
   nextAttempt: number

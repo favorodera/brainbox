@@ -1,4 +1,11 @@
-// Streams an AI response for a chat and persists messages/title
+/**
+ * Streams an AI response for a chat and persists messages/title.
+ *
+ * Route: POST /api/chats/:id
+ * Auth: Required (Supabase session cookie)
+ * Body: { messages: UIMessage[] }
+ * Response: Streamed UI message chunks
+ */
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import { convertToModelMessages, createUIMessageStream, createUIMessageStreamResponse, generateText, streamText } from 'ai'
 import type { UIMessage } from 'ai'
@@ -102,6 +109,7 @@ export default defineLazyEventHandler(() => {
         })
       }
 
+      // For persistence and titling, inspect the latest message
       const lastMessage = messages[messages.length - 1]
 
       if (lastMessage && lastMessage.role === 'user') {
@@ -125,6 +133,27 @@ export default defineLazyEventHandler(() => {
         }
       }
 
+      // Generate a concise title on first user message if not already set
+      if (!chat.title) {
+        try {
+          const { text } = await generateText({
+            model: model,
+            system: title,
+            prompt: JSON.stringify(messages[0]),
+          })
+          
+          const normalized = text.replace(/:/g, '').split('\n')[0]?.trim()
+  
+          await client
+            .from('chats')
+            .update({ title: normalized })
+            .match({ id, owner_id: user.id })
+        } catch {
+          // Fail silently on title
+        }
+      }
+
+      // Begin streaming the assistant response to the client
       const stream = createUIMessageStream({
         execute({ writer }) {
 
@@ -137,41 +166,6 @@ export default defineLazyEventHandler(() => {
           writer.merge(result.toUIMessageStream())
           
         },
-        async onFinish({ responseMessage }) {
-          try {
-            await client
-              .from('messages')
-              .insert({
-                chat_id: id,
-                id: responseMessage.id,
-                role: responseMessage.role,
-                created_at: new Date().toISOString(),
-                parts: responseMessage.parts as unknown as Json[],
-              })
-        
-            if (!chat.title) {
-              try {
-                const { text } = await generateText({
-                  model: model,
-                  system: title,
-                  prompt: JSON.stringify(messages[0]),
-                })
-                
-                const normalized = text.replace(/:/g, '').split('\n')[0]?.trim()
-        
-                await client
-                  .from('chats')
-                  .update({ title: normalized })
-                  .match({ id, owner_id: user.id })
-              } catch {
-                // Fail silently on title
-              }
-            }
-          } catch {
-            // TODO: Queue the AI response if persistence fails
-          }
-        },
-        
       })
 
       return createUIMessageStreamResponse({

@@ -1,4 +1,8 @@
-<!-- Modal with tabbed settings sections and kept-alive content -->
+<!--
+  Settings modal with tabbed sections. Content is kept-alive for snappy UX.
+  - Left side: tabs list
+  - Right side: active section content
+-->
 <template>
 
   <UModal

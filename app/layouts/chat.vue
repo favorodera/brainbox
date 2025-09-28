@@ -118,47 +118,36 @@ const user = useSupabaseUser()
 
 const { data: chats } = await useChatsStore('chats')
 
-const chatsList = computed(() => chats.value || [])
+const mappedChats = computed(() =>
+  (chats.value || []).map(chat => ({
+    id: chat.id,
+    label: chat.title || 'Untitled',
+    slot: 'chat' as const,
+    to: `/chats/${chat.id}`,
+    class: !chat.title ? 'text-muted' : '',
+    icon: 'lucide:message-circle',
+  })),
+)
 
 const commandPaletteGroups = computed<CommandPaletteGroup<CommandPaletteItem>[]>(() => {
-  if (!chatsList.value.length) return []
-
+  if (!mappedChats.value.length) return []
   return [
     {
       id: 'chats',
       items: [
-        {
-          id: 'label-chats',
-          label: 'Chats',
-          type: 'label' as const,
-        },
-        ...chatsList.value.map(chat => ({
-          ...chat,
-          slot: 'chat' as const,
-          class: chat.label === 'Untitled' ? 'text-muted' : '',
-        })),
+        { id: 'label-chats', label: 'Chats', type: 'label' as const },
+        ...mappedChats.value,
       ],
     },
   ]
 })
 
 const navigationMenuItems = computed<NavigationMenuItem[]>(() => {
-  if (!chatsList.value.length) return []
-
+  if (!mappedChats.value.length) return []
   return [
-    {
-      id: 'label-chats',
-      label: 'Chats',
-      type: 'label' as const,
-    },
-    ...chatsList.value.map(chat => ({
-      ...chat,
-      slot: 'chat' as const,
-      icon: undefined,
-      class: chat.label === 'Untitled' ? 'text-muted' : '',
-    })),
+    { id: 'label-chats', label: 'Chats', type: 'label' as const },
+    ...mappedChats.value.map(({ icon, ...item }) => item),
   ]
 })
-
 
 </script>

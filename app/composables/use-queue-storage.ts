@@ -1,9 +1,12 @@
 import { createStorage } from 'unstorage'
 import indexedDbDriver from 'unstorage/drivers/indexedb'
 
+/** Database name for the local IndexedDB storage */
 const DB_NAME = 'brainbox'
+/** Store used to keep retryable chat messages */
 const STORE_NAME = 'retry_queue'
 
+/** Shared storage instance for queued messages */
 const storage = createStorage<QueuedMessage>({
   driver: indexedDbDriver({
     base: 'app:',
@@ -12,7 +15,10 @@ const storage = createStorage<QueuedMessage>({
   }),
 })
 
-async function addToQueue(
+/**
+ * Adds a message to the retry queue with metadata for scheduling.
+ */
+async function add(
   message: UIMessageExtension,
   retries = 0,
   nextAttempt = Date.now(),
@@ -21,11 +27,17 @@ async function addToQueue(
   await storage.setItem(`${STORE_NAME}:${message.id}`, queued)
 }
 
-async function removeFromQueue(id: string) {
+/**
+ * Removes a message from the retry queue by id.
+ */
+async function remove(id: string) {
   await storage.removeItem(`${STORE_NAME}:${id}`)
 }
 
-async function getReadyQueued() {
+/**
+ * Returns all messages ready to be retried based on `nextAttempt`.
+ */
+async function getReady() {
   const allKeys = await storage.getKeys(STORE_NAME)
   const now = Date.now()
   const messages: QueuedMessage[] = []
@@ -43,7 +55,8 @@ async function getReadyQueued() {
 
 export default function () {
   return {
-    addToQueue,
-    removeFromQueue,
+    add,
+    remove,
+    getReady,
   }
 }

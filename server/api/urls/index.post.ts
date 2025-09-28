@@ -1,8 +1,15 @@
-// Adds new URLs to the authenticated user's personalization list
+/**
+ * Adds new URLs to the authenticated user's personalization list.
+ *
+ * Route: POST /api/urls
+ * Auth: Required (Supabase session cookie)
+ * Body: { urls: Array<{ name: string; url: string }> }
+ * Response: 'OK'
+ */
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import { z } from 'zod'
 
-// Body validation schema for URL entries
+/** Body validation schema for URL entries */
 const schema = z.object({
   urls: z.array(
     z.object({
@@ -12,7 +19,9 @@ const schema = z.object({
   ),
 })
 
-// POST /api/urls → appends provided URLs via RPC
+/**
+ * Appends provided URLs via Postgres RPC for atomic updates.
+ */
 export default defineEventHandler(async (event) => {
 
   try {

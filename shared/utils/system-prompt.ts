@@ -1,3 +1,6 @@
+/**
+ * System prompt used to generate concise chat titles from the first user message.
+ */
 const title = `
 Create a short title (3 to 5 words, max 30 characters) based only on the user's first message.
 

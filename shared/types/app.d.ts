@@ -4,6 +4,9 @@ declare module '#app' {
       statusCode?: number
       statusMessage?: string
       message?: string
+      data?: {
+        payload?: UIMessageExtension
+      }
     }
   }
 }
@@ -14,6 +17,9 @@ declare global {
       statusCode?: number
       statusMessage?: string
       message?: string
+      data?: {
+        payload?: UIMessageExtension
+      }
     }
   }
 }

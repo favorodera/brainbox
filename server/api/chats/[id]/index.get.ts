@@ -1,7 +1,14 @@
-// GET /api/chats/:id → returns chat content if owned by requester
+/**
+ * Returns chat content if owned by the authenticated requester.
+ *
+ * Route: GET /api/chats/:id
+ * Auth: Required (Supabase session cookie)
+ * Response: { id: string; messages: Array<{ id: string; role: string; parts: Json[] }> }
+ */
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import { z } from 'zod'
 
+/** Route params validation schema */
 const schema = z.object({
   /** Chat ID */
   id: z.string(),

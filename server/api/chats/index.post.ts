@@ -1,7 +1,15 @@
-// Creates an empty chat for the authenticated user and returns its id
+/**
+ * Creates an empty chat for the authenticated user and returns the new chat id.
+ *
+ * Route: POST /api/chats
+ * Auth: Required (Supabase session cookie)
+ * Response: string (chat id)
+ */
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 
-// POST /api/chats → inserts a new chat row with empty messages
+/**
+ * Inserts a new chat row (title initially null) and returns its id.
+ */
 export default defineEventHandler(async (event) => {
 
   try {
@@ -33,6 +41,7 @@ export default defineEventHandler(async (event) => {
       })
     }
 
+    // Return only the identifier for navigation
     return data.id
 
   } catch (error) {

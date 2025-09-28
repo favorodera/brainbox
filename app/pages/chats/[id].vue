@@ -1,3 +1,9 @@
+<!--
+  Chat page renders a single conversation with streaming AI responses.
+  - Header: navbar
+  - Body: messages list and prompt input
+  - Handles retry persistence and title refresh on first message
+-->
 <template>
   <div class="grid w-full">
 
@@ -130,10 +136,14 @@ definePageMeta({
 
 const route = useRoute()
 
+// MDC component mapping (streamed code blocks)
 const components = {
   pre: ProseStreamPre as unknown as DefineComponent,
 }
 
+const { add } = useQueueStorage()
+
+// Load chat thread and messages for the given id
 const { data, status, error, execute } = await useFetch<{ id: string, messages: UIMessage[], title: string }>(`/api/chats/${route.params.id}`, {
   headers: useRequestHeaders(['cookie']),
   method: 'GET',
@@ -141,21 +151,41 @@ const { data, status, error, execute } = await useFetch<{ id: string, messages: 
   watch: [route],
 })
 
-const { chats: { refresh }, initPrompt } = useChatsStore()
+// Persist assistant messages; on failure queue locally for retry
+const { execute: persist } = useRequest(`/api/chats/${route.params.id}/persist/`, {
+  $fetch: {
+    method: 'POST',
+    headers: useRequestHeaders(['cookie']),
+  },
+  hooks: {
+    onError(error) {
+      const message = error.data?.data?.payload
+      if (message) {
+        add(message)
+      }
+    },
+  },
+}, false)
+
+// Access chats store for title refresh and initial prompt
+const { chats: { refresh }, getChatById, initPrompt } = useChatsStore()
 
 const prompt = ref('')
 
 const toast = useToast()
 
+// Clipboard utility for message copy action
 const { copy, copied } = useClipboard({
   copiedDuring: 1000,
   legacy: true,
 })
 
+// Copy a message's text content
 function handleCopy(event: MouseEvent, message: UIMessage) {
   copy(getTextFromMessage(message))
 }
 
+// Guard against invalid or missing chat
 if (!data.value) {
   throw createError({
     statusCode: 404,
@@ -164,6 +194,7 @@ if (!data.value) {
   })
 }
 
+// Chat controller handles sending and streaming messages
 const chat = new Chat({
   id: data.value.id,
   messages: data.value.messages,
@@ -177,11 +208,17 @@ const chat = new Chat({
       color: 'error',
     })
   },
-  onFinish() {
-    refresh()
+  async onFinish({ message }) {
+  
+    const chat = getChatById(route.params.id as string)
+
+    if (!chat || !chat.title) refresh()
+
+    persist({ $fetch: { body: { message } } })
   },
 })
 
+// Submit prompt and stream assistant response
 function handleSubmit() {
   chat.sendMessage(
     { text: prompt.value },
@@ -190,6 +227,7 @@ function handleSubmit() {
   prompt.value = ''
 }
 
+// If an init prompt exists (from home), send it once page mounts
 onMounted(() => {
 
   if (initPrompt.value.trim() !== '') {
