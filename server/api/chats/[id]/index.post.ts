@@ -90,7 +90,7 @@ export default defineLazyEventHandler(() => {
         .from('chats')
         .select('id, title')
         .match({ id, owner_id: user.id })
-        .single()
+        .maybeSingle()
 
       if (error) {
         throw createError({

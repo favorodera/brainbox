@@ -136,6 +136,8 @@ definePageMeta({
 
 const route = useRoute()
 
+const { start } = useQueueStorage()
+
 // MDC component mapping (streamed code blocks)
 const components = {
   pre: ProseStreamPre as unknown as DefineComponent,
@@ -237,6 +239,9 @@ onMounted(() => {
     )
     initPrompt.value = ''
   }
+
+  // Start the retry queue worker to process the retry queue
+  start()
 
 })
 

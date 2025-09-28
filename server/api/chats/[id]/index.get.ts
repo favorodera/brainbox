@@ -46,7 +46,7 @@ export default defineEventHandler(async (event) => {
       .from('chats')
       .select('id')
       .match({ id, owner_id: user.id })
-      .single()
+      .maybeSingle()
 
     if (chatError) {
       throw createError({

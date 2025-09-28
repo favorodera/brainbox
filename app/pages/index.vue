@@ -61,7 +61,11 @@ definePageMeta({
   layout: 'chat',
 })
 
+const { start } = useQueueStorage()
+
 const { initPrompt } = useChatsStore()
+
+const user = useSupabaseUser()
 
 const toast = useToast()
 
@@ -92,5 +96,12 @@ const { status, execute } = useRequest<string>('/api/chats/', {
 /** Idles prompt box awaiting redirect */
 const idlePromptBox = computed(() => {
   return status.value === 'pending' || status.value === 'success'
+})
+
+onMounted(() => {
+  if (user.value) {
+    // If the user is authenticated, start the retry queue worker to process the retry queue
+    start()
+  }
 })
 </script>

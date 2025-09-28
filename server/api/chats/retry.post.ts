@@ -42,6 +42,28 @@ export default defineEventHandler(async (event) => {
     const { message } = validate.data
     const client = await serverSupabaseClient<Database>(event)
 
+    // Check if the chat still exists before attempting to insert the message
+    const { data: chat, error: chatError } = await client
+      .from('chats')
+      .select('id')
+      .match({ id: message.chat_id, owner_id: user.id })
+      .maybeSingle()
+
+
+    if (chatError) {
+      throw createError({
+        statusCode: 500,
+        statusMessage: chatError.code,
+        message: chatError.message,
+      })
+    }
+
+    if (!chat) {
+      // Chat doesn't exist - return success to remove from queue
+      return 'OK'
+    }
+
+
     const { error } = await client.from('messages').insert({
       id: message.id,
       chat_id: message.chat_id,
@@ -59,7 +81,7 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    return { success: true }
+    return 'OK'
   } catch (error) {
     return getError(error)
   }
