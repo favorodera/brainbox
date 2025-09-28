@@ -8,7 +8,7 @@
   <UApp
     id="main"
     tabindex="-1"
-    :toaster="{ position: 'top-right', progress: false, duration: 4000 }"
+    :toaster="{ expand: false, position: 'top-center', progress: false, duration: 3000 }"
   >
     <NuxtRouteAnnouncer />
     <NuxtLoadingIndicator
@@ -22,12 +22,6 @@
 </template>
 
 <script lang="ts" setup>
-const colorMode = useColorMode()
-
-const themeColor = computed(() =>
-  colorMode.value === 'dark' ? '#000000' : '#ffffff',
-)
-
 useSeoMeta({
   titleTemplate: 'Brainbox %separator %s',
   twitterCard: 'summary_large_image',
@@ -52,16 +46,15 @@ useHead({
       content: '#000000',
       media: '(prefers-color-scheme: dark)',
     },
-
-    {
-      name: 'theme-color',
-      content: themeColor,
-      tagPriority: 1,
-    },
-
     {
       name: 'msapplication-navbutton-color',
-      content: themeColor,
+      content: '#ffffff',
+      media: '(prefers-color-scheme: light)',
+    },
+    {
+      name: 'msapplication-navbutton-color',
+      content: '#000000',
+      media: '(prefers-color-scheme: dark)',
     },
     {
       name: 'apple-mobile-web-app-status-bar-style',

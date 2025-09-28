@@ -14,10 +14,7 @@
     >
 
       <template #header="{ collapsed }">
-        <Logo
-          with-text
-          :ui="{ text: collapsed ? 'hidden' : '' }"
-        />
+        <Logo :ui="{ text: collapsed ? 'hidden' : '' }" />
 
         <UDashboardSidebarCollapse v-if="!collapsed" />
 

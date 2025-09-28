@@ -40,8 +40,6 @@ export default defineLazyEventHandler(() => {
   return defineEventHandler(async (event) => {
 
     try {
-      const timestamp = new Date().toISOString()
-
       const user = await serverSupabaseUser(event)
 
       if (!user) {
@@ -114,7 +112,7 @@ export default defineLazyEventHandler(() => {
             chat_id: id,
             id: lastMessage.id,
             role: lastMessage.role,
-            created_at: timestamp,
+            created_at: new Date().toISOString(),
             parts: lastMessage.parts as unknown as Json[],
           })
 
@@ -147,7 +145,7 @@ export default defineLazyEventHandler(() => {
                 chat_id: id,
                 id: responseMessage.id,
                 role: responseMessage.role,
-                created_at: timestamp,
+                created_at: new Date().toISOString(),
                 parts: responseMessage.parts as unknown as Json[],
               })
         

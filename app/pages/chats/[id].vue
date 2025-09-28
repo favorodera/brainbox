@@ -188,8 +188,6 @@ function handleSubmit() {
     { headers: useRequestHeaders(['cookie']) },
   )
   prompt.value = ''
-
-  
 }
 
 onMounted(() => {
