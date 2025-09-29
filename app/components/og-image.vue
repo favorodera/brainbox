@@ -2,7 +2,7 @@
   <div
     class="flex h-full w-full flex-col items-center justify-center bg-black p-6 text-white sm:p-10"
   >
-    <NuxtImg
+    <img
       src="/favicon-dark.svg"
       width="128"
       height="128"
@@ -10,7 +10,7 @@
       class="rounded-xl bg-black shadow-lg"
       loading="eager"
       fetchpriority="high"
-    />
+    >
 
     <h1
       class="mt-4 text-center text-3xl leading-none font-bold tracking-tight"
