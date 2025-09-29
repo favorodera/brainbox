@@ -27,13 +27,18 @@
 </template>
 
 <script lang="ts" setup>
+defineOgImageComponent('OGImage')
+
 useSeoMeta({
-  titleTemplate: 'Brainbox %separator %s',
+  titleTemplate: '%separator %s',
   twitterCard: 'summary_large_image',
   twitterSite: '@favorodera',
   twitterCreator: '@favorodera',
   colorScheme: 'dark light',
   author: 'Favour Emeka',
+  description: 'Your personal AI chat companion for knowledge and assistance.',
+  ogDescription: 'Your personal AI chat companion for knowledge and assistance.',
+  twitterDescription: 'Your personal AI chat companion for knowledge and assistance.',
 })
 
 useHead({

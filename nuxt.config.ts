@@ -25,6 +25,10 @@ export default defineNuxtConfig({
     layoutTransition: { name: 'fade-out-in', mode: 'out-in' },
   },
   css: ['~/assets/styles/index.css'],
+  site: {
+    url: 'https://brainboxaichat.vercel.app/',
+    name: 'brainbox',
+  },
   mdc: {
     highlight: {
       shikiEngine: 'javascript',
