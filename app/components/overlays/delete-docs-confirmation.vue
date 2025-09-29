@@ -1,12 +1,12 @@
-<!-- Confirmation modal to delete selected personalization URLs -->
+<!-- Confirmation modal to delete selected Docs -->
 <template>
   <UModal
     :close="{
       onClick: () => emit('close', false),
       disabled: status === 'pending',
     }"
-    title="Delete URLs"
-    description="Are you sure you want to delete the following URLs? This action cannot be undone."
+    title="Delete Docs"
+    description="Are you sure you want to delete the following docs? This action cannot be undone."
     :ui="{
       content: 'max-w-2xl',
       footer: 'justify-between',
@@ -18,20 +18,20 @@
 
         <ul class="divide-y divide-default rounded border border-default bg-muted/50">
           <li
-            v-for="(url, index) in urls"
+            v-for="(doc, index) in docs"
             :key="index"
             class="flex flex-col justify-between gap-1 px-3 py-2 sm:flex-row sm:items-center"
           >
-            <span class="truncate text-sm">{{ url.name }}</span>
-            <span class="truncate text-xs text-muted">{{ url.url }}</span>
+            <span class="truncate text-sm">{{ doc.name }}</span>
+            <span class="truncate text-xs text-muted">{{ doc.url }}</span>
           </li>
         </ul>
 
         <div
-          v-if="!urls?.length"
+          v-if="!docs?.length"
           class="py-4 text-center text-muted"
         >
-          No URLs selected for deletion.
+          No docs selected for deletion.
         </div>
 
       </div>
@@ -61,23 +61,23 @@
 
 <script setup lang="ts">
 const props = defineProps<{
-  urls: { name: string, url: string }[]
+  docs: { name: string, url: string }[]
 }>()
 
-const { refresh } = useUrlsStore('urls')
+const { refresh } = useContextsStore('docs')
 const toast = useToast()
 
-// Request helper to DELETE URLs via the server API
-const { execute, status } = useRequest('/api/urls', {
+// Request helper to DELETE docs via the server API
+const { execute, status } = useRequest('/api/docs', {
   $fetch: {
     method: 'DELETE',
-    body: { urls: [...props.urls] },
+    body: { docs: [...props.docs] },
   },
   hooks: {
     onSuccess() {
 
       toast.add({
-        title: 'URLs deleted successfully',
+        title: 'Docs deleted successfully',
         color: 'success',
         icon: 'lucide:check',
       })
@@ -88,7 +88,7 @@ const { execute, status } = useRequest('/api/urls', {
     },
     onError(error) {
       toast.add({
-        title: error?.data?.message || 'Failed to delete URLs',
+        title: error?.data?.message || 'Failed to delete docs',
         color: 'error',
         icon: 'lucide:x',
       })

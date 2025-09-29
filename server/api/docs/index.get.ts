@@ -1,7 +1,7 @@
 /**
- * Returns the authenticated user's personalization URLs array.
+ * Returns the authenticated user's personalization docs array.
  *
- * Route: GET /api/urls
+ * Route: GET /api/docs
  * Auth: Required (Supabase session cookie)
  * Response: Array<{ name: string; url: string }>
  */
@@ -28,7 +28,7 @@ export default defineEventHandler(async (event) => {
 
     const { error, data } = await client
       .from('users')
-      .select('urls')
+      .select('docs')
       .eq('id', user.id)
       .single()
 
@@ -40,8 +40,8 @@ export default defineEventHandler(async (event) => {
       })
     }
     
-    // Return the stored URLs array
-    return data.urls
+    // Return the stored docs array
+    return data.docs
 
   } catch (error) {
     return getError(error)

@@ -1,10 +1,10 @@
-<!-- Modal form to add multiple personalization URLs with validation -->
+<!-- Modal form to add multiple Docs with validation -->
 <template>
 
   <UModal
     :close="{ onClick: () => emit('close', false), disabled: status === 'pending' }"
-    title="Add New URLs"
-    description="Add new URLs for personalization."
+    title="Add New Docs"
+    description="Add new docs for personalization."
     :ui="{
       content: 'max-w-2xl',
     }"
@@ -14,7 +14,7 @@
     <template #body>
 
       <UForm
-        id="add-urls-form"
+        id="add-docs-form"
         :schema
         :state
         class="space-y-2"
@@ -23,33 +23,33 @@
       >
 
         <div
-          v-for="(url, index) in state.urls"
+          v-for="(doc, index) in state.docs"
           :key="index"
           class="flex items-start gap-2"
         >
 
           <UFormField
-            :name="`urls.${index}.name`"
+            :name="`docs.${index}.name`"
             class="flex-1"
           >
             <UInput
-              v-model.trim="url.name"
+              v-model.trim="doc.name"
               placeholder="Name"
-              :name="`urls.${index}.name`"
+              :name="`docs.${index}.name`"
               autocomplete="on"
               type="text"
             />
           </UFormField>
 
           <UFormField
-            :name="`urls.${index}.url`"
+            :name="`docs.${index}.url`"
             class="flex-1"
           >
             <UInput
-              v-model.trim="url.url"
+              v-model.trim="doc.url"
               placeholder="https://url.com"
               autocomplete="website"
-              :name="`urls.${index}.url`"
+              :name="`docs.${index}.url`"
               type="url"
             />
           </UFormField>
@@ -59,8 +59,8 @@
             color="neutral"
             icon="lucide:trash"
             size="sm"
-            :disabled="state.urls?.length === 1"
-            @click="handleUrls.remove(index)"
+            :disabled="state.docs?.length === 1"
+            @click="handleDocs.remove(index)"
           />
 
 
@@ -72,8 +72,8 @@
           icon="lucide:plus"
           size="sm"
           square
-          label="Add URL"
-          @click="handleUrls.add()"
+          label="Add Doc"
+          @click="handleDocs.add()"
         />
 
       </UForm>
@@ -81,10 +81,10 @@
 
     <template #footer>
       <UButton
-        label="Save URLs"
+        label="Save Docs"
         block
         type="submit"
-        form="add-urls-form"
+        form="add-docs-form"
         :loading="status === 'pending'"
         :disabled="status === 'pending'"
       />
@@ -100,14 +100,14 @@ import z from 'zod'
 
 const emit = defineEmits<{ close: [boolean] }>()
 
-// Store refresh to re-fetch URLs after successful submission
-const { refresh } = useUrlsStore('urls')
+// Store refresh to re-fetch docs after successful submission
+const { refresh } = useContextsStore('docs')
 
 const toast = useToast()
 
-// Form validation schema for URL entries
+// Form validation schema for doc entries
 const schema = z.object({
-  urls: z.array(
+  docs: z.array(
     z.object({
       name: z.string('Invalid input').nonempty('Name is required'),
       url: z.url('Invalid URL').nonempty('URL is required'),
@@ -117,20 +117,20 @@ const schema = z.object({
 
 type Schema = z.output<typeof schema>
 
-// Reactive form state containing the list of URL rows
+// Reactive form state containing the list of doc rows
 const state = reactive<Partial<Schema>>({
-  urls: [{ name: '', url: '' }],
+  docs: [{ name: '', url: '' }],
 })
 
-// Request helper to POST URLs to the server API
-const { execute, status } = useRequest('/api/urls', {
+// Request helper to POST docs to the server API
+const { execute, status } = useRequest('/api/docs', {
   $fetch: {
     method: 'POST',
   },
   hooks: {
     onSuccess() {
       toast.add({
-        title: 'URLs saved successfully',
+        title: 'Docs saved successfully',
         color: 'success',
         icon: 'lucide:check',
       })
@@ -150,31 +150,31 @@ const { execute, status } = useRequest('/api/urls', {
   
 }, false)
 
-// Submits the form by sending current URL list to the API
+// Submits the form by sending current docs list to the API
 async function handleSubmit(event: FormSubmitEvent<Schema>) {
 
   await execute({
     $fetch: {
       body: {
-        urls: [...event.data.urls],
+        docs: [...event.data.docs],
       },
     },
   })
 
 }
 
-// Helpers to add/remove URL rows in the form
-const handleUrls = {
+// Helpers to add/remove doc rows in the form
+const handleDocs = {
   add() {
-    if (!state.urls) {
-      state.urls = [{ name: '', url: '' }]
+    if (!state.docs) {
+      state.docs = [{ name: '', url: '' }]
     }
-    state.urls.push({ name: '', url: '' })
+    state.docs.push({ name: '', url: '' })
   },
 
   remove(index: number) {
-    if (state.urls && state.urls.length > 1) {
-      state.urls.splice(index, 1)
+    if (state.docs && state.docs.length > 1) {
+      state.docs.splice(index, 1)
     }
   },
 }

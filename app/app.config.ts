@@ -77,5 +77,10 @@ export default defineAppConfig({
         root: 'bg-elevated ring-0',
       },
     },
+    commandPalette: {
+      slots: {
+        item: 'cursor-pointer',
+      },
+    },
   },
 })

@@ -1,9 +1,9 @@
-<!-- Modal form to edit existing personalization URLs with change detection -->
+<!-- Modal form to edit existing Docs with change detection -->
 <template>
   <UModal
     :close="{ onClick: () => emit('close', false), disabled: status === 'pending' }"
-    title="Edit URLs"
-    description="Edit the URLs below. Make your changes and save."
+    title="Edit Docs"
+    description="Edit the docs below. Make your changes and save."
     :ui="{
       content: 'max-w-2xl',
     }"
@@ -11,7 +11,7 @@
   >
     <template #body>
       <UForm
-        id="edit-urls-form"
+        id="edit-docs-form"
         :schema="schema"
         :state="state"
         class="space-y-2"
@@ -19,32 +19,32 @@
         @submit="handleSubmit"
       >
         <div
-          v-for="(url, index) in state.urls"
+          v-for="(doc, index) in state.docs"
           :key="index"
           class="flex items-start gap-2"
         >
           <UFormField
-            :name="`urls.${index}.name`"
+            :name="`docs.${index}.name`"
             class="flex-1"
           >
             <UInput
-              v-model.trim="url.name"
+              v-model.trim="doc.name"
               placeholder="Name"
-              :name="`urls.${index}.name`"
+              :name="`docs.${index}.name`"
               autocomplete="on"
               type="text"
             />
           </UFormField>
 
           <UFormField
-            :name="`urls.${index}.url`"
+            :name="`docs.${index}.url`"
             class="flex-1"
           >
             <UInput
-              v-model.trim="url.url"
+              v-model.trim="doc.url"
               placeholder="https://url.com"
               autocomplete="website"
-              :name="`urls.${index}.url`"
+              :name="`docs.${index}.url`"
               type="url"
             />
           </UFormField>
@@ -57,18 +57,18 @@
         label="Cancel"
         color="neutral"
         variant="soft"
-        :loading="status === 'pending'"
+        :disabled="status === 'pending'"
         block
         @click="emit('close', false)"
       />
       <UButton
-        label="Save URLs"
+        label="Save Docs"
         color="primary"
         :loading="status === 'pending'"
         loading-auto
         block
         type="submit"
-        form="edit-urls-form"
+        form="edit-docs-form"
         :disabled="status === 'pending' || !anyChangeOccurred"
       />
     </template>
@@ -80,18 +80,18 @@ import type { FormSubmitEvent } from '@nuxt/ui'
 import z from 'zod'
 
 const props = defineProps<{
-  urls: { name: string, url: string }[]
+  docs: { name: string, url: string }[]
 }>()
 
 const emit = defineEmits<{ close: [boolean] }>()
 
-// Store refresh to re-fetch URLs after successful update
-const { refresh } = useUrlsStore('urls')
+// Store refresh to re-fetch docs after successful update
+const { refresh } = useContextsStore('docs')
 const toast = useToast()
 
-// Form validation schema for URL entries
+// Form validation schema for doc entries
 const schema = z.object({
-  urls: z.array(
+  docs: z.array(
     z.object({
       name: z.string('Invalid input').nonempty('Name is required'),
       url: z.url('Invalid URL').nonempty('URL is required'),
@@ -101,29 +101,29 @@ const schema = z.object({
 
 type Schema = z.output<typeof schema>
 
-// Local copy of the URLs to edit in-place
+// Local copy of the docs to edit in-place
 const state = ref<Schema>({
-  urls: props.urls.map(url => ({ ...url })),
+  docs: props.docs.map(doc => ({ ...doc })),
 })
 
 // Tracks whether any field changed to enable Save button
 const anyChangeOccurred = computed(() => {
-  return props.urls.some((item, index) => {
-    const current = state.value.urls[index]
-    return item.name !== current?.name || item.url !== current?.url
+  return props.docs.some((doc, index) => {
+    const current = state.value.docs[index]
+    return doc.name !== current?.name || doc.url !== current?.url
   })
 })
 
 
-// Request helper to PATCH URLs to the server API
-const { execute, status } = useRequest('/api/urls', {
+// Request helper to PATCH docs to the server API
+const { execute, status } = useRequest('/api/docs', {
   $fetch: {
     method: 'PATCH',
   },
   hooks: {
     onSuccess() {
       toast.add({
-        title: 'URLs updated successfully',
+        title: 'Docs updated successfully',
         color: 'success',
         icon: 'lucide:check',
       })
@@ -142,12 +142,12 @@ const { execute, status } = useRequest('/api/urls', {
   },
 }, false)
 
-// Submits the form by sending updated URLs to the API
+// Submits the form by sending updated docs to the API
 async function handleSubmit(event: FormSubmitEvent<Schema>) {
   await execute({
     $fetch: {
       body: {
-        urls: [...event.data.urls],
+        docs: [...event.data.docs],
       },
     },
   })

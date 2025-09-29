@@ -1,9 +1,9 @@
-<!-- Modal to search, select, and CRUD user personalization URLs -->
+<!-- Modal to search, select, and CRUD user Docs -->
 <template>
   <UModal
     :close="{ onClick: () => emit('close', false) }"
-    title="Manage URLs"
-    description="Add, edit, or remove the URLs used for personalization."
+    title="Manage Docs"
+    description="Add, edit, or remove the docs used for personalization."
     :ui="{ content: 'max-w-2xl' }"
     :dismissible="false"
   >
@@ -18,10 +18,10 @@
         >
           <div class="flex items-center justify-between gap-4">
             <UInput
-              id="search-urls"
+              id="search-docs"
               v-model="globalFilter"
-              name="search-urls"
-              placeholder="Search URLs"
+              name="search-docs"
+              placeholder="Search docs"
               class="max-w-xs"
               size="sm"
             />
@@ -37,7 +37,7 @@
                 variant="soft"
                 icon="lucide:edit"
                 class="max-sm:hidden"
-                @click="editUrlsModal.open({ urls: selectedRows })"
+                @click="editDocsModal.open({ docs: selectedRows })"
               />
 
               <UButton
@@ -47,7 +47,7 @@
                 size="sm"
                 icon="lucide:trash-2"
                 class="max-sm:hidden"
-                @click="deleteUrlsConfirmationModal.open({ urls: selectedRows })"
+                @click="deleteDocsConfirmationModal.open({ docs: selectedRows })"
               />
 
               <UDropdownMenu
@@ -56,12 +56,12 @@
                   {
                     label: `Edit ${selectedRows.length}`,
                     icon: 'lucide:edit',
-                    onSelect: () => editUrlsModal.open({ urls: selectedRows }),
+                    onSelect: () => editDocsModal.open({ docs: selectedRows }),
                   },
                   {
                     label: `Delete ${selectedRows.length}`,
                     icon: 'lucide:trash-2',
-                    onSelect: () => deleteUrlsConfirmationModal.open({ urls: selectedRows }),
+                    onSelect: () => deleteDocsConfirmationModal.open({ docs: selectedRows }),
                     color: 'error',
                   },
                 ]"
@@ -82,7 +82,7 @@
               label="Add"
               color="neutral"
               size="sm"
-              @click="addUrlsModal.open()"
+              @click="addDocsModal.open()"
             />
 
 
@@ -93,9 +93,9 @@
             v-model:pagination="pagination"
             v-model:row-selection="rowSelection"
             v-model:global-filter="globalFilter"
-            caption="URL Table"
+            caption="Docs Table"
             class="shrink-0"
-            empty="No URLs found"
+            empty="No docs found"
             :data="data"
             :columns="columns"
             sticky
@@ -116,7 +116,7 @@
               </template>
 
               <template v-else>
-                Total URLs: {{ data.length }}
+                Total docs: {{ data.length }}
               </template>
             </p>
 
@@ -171,19 +171,19 @@
 </template>
 
 <script setup lang="ts">
-import { LazyOverlaysAddUrls, LazyOverlaysDeleteUrlsConfirmation, LazyOverlaysEditUrls, UButton, UIcon } from '#components'
+import { LazyOverlaysAddDocs, LazyOverlaysDeleteDocsConfirmation, LazyOverlaysEditDocs, UButton, UIcon } from '#components'
 import type { TableColumn, TableRow } from '@nuxt/ui'
 
-// URLs store provides list, loading state, error, and refetch
-const { data, status, error, execute } = useUrlsStore('urls')
+// Docs store provides list, loading state, error, and refetch
+const { data, status, error, execute } = useContextsStore('docs')
 
 const emit = defineEmits<{ close: [boolean] }>()
 
 // Overlay factory to open nested modals for add/edit/delete
 const overlay = useOverlay()
-const addUrlsModal = overlay.create(LazyOverlaysAddUrls)
-const deleteUrlsConfirmationModal = overlay.create(LazyOverlaysDeleteUrlsConfirmation)
-const editUrlsModal = overlay.create(LazyOverlaysEditUrls)
+const addDocsModal = overlay.create(LazyOverlaysAddDocs)
+const deleteDocsConfirmationModal = overlay.create(LazyOverlaysDeleteDocsConfirmation)
+const editDocsModal = overlay.create(LazyOverlaysEditDocs)
 
 const table = useTemplateRef('table')
 
@@ -202,7 +202,7 @@ function onSelect(row: TableRow<{ name: string, url: string }>, _event?: Event) 
   row.toggleSelected()
 }
 
-// Derives the list of selected URL objects
+// Derives the list of selected doc objects
 const selectedRows = computed((): { name: string, url: string }[] => {
   const tableApi = table.value?.tableApi
   if (!tableApi) return []

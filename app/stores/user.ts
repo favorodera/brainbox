@@ -4,7 +4,7 @@
 export const useUserStore = createStore('user-store', ({ request }) => {
 
   /**
-   * Server-requested user payload. Shape depends on `/api/user` implementation.
+   * Server-requested user payload.
    */
   const user = request(({ signal }) => $fetch(
     '/api/user/',

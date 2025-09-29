@@ -12,14 +12,14 @@
     <div class="flex items-center justify-between">
 
       <p>
-        URLs
+        Docs
       </p>
 
       <UButton
         color="neutral"
         variant="link"
         label="Manage"
-        @click="manageUrlsModal.open()"
+        @click="manageDocsModal.open()"
       />
 
     </div>
@@ -30,10 +30,10 @@
 </template>
 
 <script setup lang="ts">
-import { LazyOverlaysManageUrls } from '#components'
+import { LazyOverlaysManageDocs } from '#components'
 
 const overlay = useOverlay()
-const manageUrlsModal = overlay.create(LazyOverlaysManageUrls)
+const manageDocsModal = overlay.create(LazyOverlaysManageDocs)
 </script>
 
 <style scoped>

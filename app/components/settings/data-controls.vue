@@ -29,7 +29,7 @@
     <div class="flex items-center justify-between">
 
       <p>
-        Delete all URLs
+        Delete all Docs
       </p>
 
       <UButton

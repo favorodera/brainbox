@@ -1,17 +1,17 @@
 /**
- * Adds new URLs to the authenticated user's personalization list.
+ * Adds new docs to the authenticated user's personalization list.
  *
- * Route: POST /api/urls
+ * Route: POST /api/docs
  * Auth: Required (Supabase session cookie)
- * Body: { urls: Array<{ name: string; url: string }> }
+ * Body: { docs: Array<{ name: string; url: string }> }
  * Response: 'OK'
  */
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import { z } from 'zod'
 
-/** Body validation schema for URL entries */
+/** Body validation schema for doc entries */
 const schema = z.object({
-  urls: z.array(
+  docs: z.array(
     z.object({
       name: z.string('Invalid input').nonempty('Name is required'),
       url: z.url('Invalid URL').nonempty('URL is required'),
@@ -20,7 +20,7 @@ const schema = z.object({
 })
 
 /**
- * Appends provided URLs via Postgres RPC for atomic updates.
+ * Appends provided docs via Postgres RPC for atomic updates.
  */
 export default defineEventHandler(async (event) => {
 
@@ -48,16 +48,16 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    const { urls } = validate.data
+    const { docs } = validate.data
 
     // Supabase client scoped to this request
     const client = await serverSupabaseClient<Database>(event)
 
-    // Use Postgres function to add URLs atomically
-    const { error } = await client.rpc('manage_user_urls', {
+    // Use Postgres function to add docs atomically
+    const { error } = await client.rpc('manage_user_docs', {
       p_user_id: user.id,
       p_action: 'add',
-      p_urls: urls,
+      p_docs: docs,
     })
 
     if (error) {

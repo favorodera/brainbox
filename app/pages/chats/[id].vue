@@ -100,6 +100,41 @@
                 }"
                 @submit="handleSubmit()"
               >
+
+                <template #header>
+
+                  <UPopover
+                    arrow
+                    :content="{
+                      align: 'start',
+                      sideOffset: 5,
+                    }"
+                    size="sm"
+                  >
+                    <UTooltip text="Add Context">
+                      <UButton
+                        label="@"
+                        color="neutral"
+                        variant="subtle"
+                        size="sm"
+                      />
+                    </UTooltip>
+
+                    <template #content>
+                      <UCommandPalette
+                        v-model="commandPalletteValue"
+                        :loading="docsStatus === 'fetching'"
+                        :fuse="{ fuseOptions: { includeMatches: true } }"
+                        multiple
+                        placeholder="Add relevant context..."
+                        :groups="commandPalletteGroups"
+                        :ui="{ input: '[&>input]:h-8 [&>input]:text-sm' }"
+                      />
+                    </template>
+                  </UPopover>
+
+
+                </template>
   
                 <UChatPromptSubmit
                   :disabled="prompt.trim() === '' && chat.status !== 'error'"
@@ -128,6 +163,7 @@ import { Chat } from '@ai-sdk/vue'
 import { DefaultChatTransport, type UIMessage } from 'ai'
 import { ProseStreamPre } from '#components'
 import type { DefineComponent } from 'vue'
+import type { CommandPaletteGroup, CommandPaletteItem } from '@nuxt/ui'
 
 definePageMeta({
   layout: 'chat',
@@ -135,6 +171,8 @@ definePageMeta({
 })
 
 const route = useRoute()
+
+const { data: docs, status: docsStatus } = useContextsStore('docs')
 
 const { start } = useQueueStorage()
 
@@ -228,6 +266,41 @@ function handleSubmit() {
   )
   prompt.value = ''
 }
+
+/**
+ * Computed list of user's Docs for the command palette.
+ * Each doc is mapped to a palette item with icon, label, and URL.
+ */
+const mappedDocs = computed(() =>
+  (docs.value || []).map(doc => ({
+    icon: 'lucide:book-open', // Book icon for docs
+    label: doc.name, // Doc name as label
+    suffix: doc.url, // Doc URL as suffix
+  })),
+)
+
+/**
+ * Value for the command palette (not used here, but can be set for selection).
+ */
+const commandPalletteValue = ref([])
+
+/**
+ * Command palette groups for quick access to Docs/tools.
+ * Includes a "Docs" group with all mapped docs as children.
+ */
+const commandPalletteGroups = ref<CommandPaletteGroup<CommandPaletteItem>[]>([
+  {
+    id: 'tools',
+    items: [
+      {
+        icon: 'lucide:book-open',
+        label: 'Docs',
+        placeholder: 'Search Documentations...',
+        children: [...mappedDocs.value],
+      },
+    ],
+  },
+])
 
 // If an init prompt exists (from home), send it once page mounts
 onMounted(() => {
