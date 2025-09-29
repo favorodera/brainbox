@@ -8,7 +8,12 @@
   <UApp
     id="main"
     tabindex="-1"
-    :toaster="{ expand: false, position: 'top-center', progress: false, duration: 3000 }"
+    :toaster="{
+      expand: false,
+      position: 'top-center',
+      progress: false,
+      duration: 3000,
+    }"
   >
     <NuxtRouteAnnouncer />
     <NuxtLoadingIndicator

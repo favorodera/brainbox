@@ -65,15 +65,15 @@ const { pluck } = useSupabaseCookieRedirect()
 
 const { error, error_description } = useRoute().query
 
-watch(user, () => {
-  if (user.value) {
+watch(user, async (isAvailable) => {
+  if (isAvailable) {
   
-    return navigateTo(pluck() || '/')
+    await navigateTo(pluck() || '/')
 
   } else {
-    return navigateTo('/auth')
+    await navigateTo('/auth')
   }
-}, { immediate: true })
+})
 
 
 </script>

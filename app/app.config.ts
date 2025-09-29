@@ -72,9 +72,9 @@ export default defineAppConfig({
         base: 'cursor-pointer',
       },
     },
-    dashboardSearch: {
+    toast: {
       slots: {
-        item: 'cursor-pointer',
+        root: 'bg-elevated ring-0',
       },
     },
   },

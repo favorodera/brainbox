@@ -105,11 +105,11 @@ const toast = useToast()
 
 const redirectTo = import.meta.dev ? 'http://localhost:3000/callback' : 'https://brainboxaichat.vercel.app/callback'
 
-watch(user, () => {
-  if (user.value) {
-    return navigateTo('/callback')
+watch(user, async (isAvailable) => {
+  if (isAvailable) {
+    await navigateTo('/callback')
   }
-}, { immediate: true })
+})
 
 async function authenticate(provider: Provider) {
   try {

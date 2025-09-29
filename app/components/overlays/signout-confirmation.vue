@@ -63,7 +63,7 @@ async function signOut() {
       icon: 'lucide:check',
     }))
 
-    return navigateTo('/auth')
+    await navigateTo('/auth')
    
   } catch {
     toast.add({
