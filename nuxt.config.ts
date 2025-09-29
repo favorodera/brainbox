@@ -18,6 +18,13 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   app: {
     rootTag: 'main',
+    head: {
+      htmlAttrs: { lang: 'en', dir: 'ltr' },
+      link: [
+        { rel: 'icon', href: '/favicon-dark.ico', media: '(prefers-color-scheme:dark)' },
+        { rel: 'icon', href: '/favicon-light.ico', media: '(prefers-color-scheme:light)' },
+      ],
+    },
     rootAttrs: {
       id: 'app',
     },
@@ -27,7 +34,7 @@ export default defineNuxtConfig({
   css: ['~/assets/styles/index.css'],
   site: {
     url: 'https://brainboxaichat.vercel.app/',
-    name: 'brainbox',
+    name: 'Brainbox',
   },
   mdc: {
     highlight: {
@@ -73,6 +80,27 @@ export default defineNuxtConfig({
     customCollections: [
       { prefix: 'custom', dir: './app/assets/icons' },
     ],
+  },
+  seo: {
+    redirectToCanonicalSiteUrl: true,
+    meta: {
+      titleTemplate: '%separator %s',
+      description: 'Your personal AI chat companion for knowledge and assistance.',
+      ogDescription: 'Your personal AI chat companion for knowledge and assistance.',
+      twitterDescription: 'Your personal AI chat companion for knowledge and assistance.',
+      twitterCard: 'summary_large_image',
+      twitterSite: '@favorodera',
+      twitterCreator: '@favorodera',
+      colorScheme: 'dark light',
+      author: 'Favour Emeka',
+      themeColor: [
+        { content: '#000000', media: '(prefers-color-scheme: dark)' },
+        { content: '#ffffff', media: '(prefers-color-scheme: light)' },
+      ],
+      appleMobileWebAppStatusBarStyle: 'black-translucent',
+      viewport: 'width=device-width, initial-scale=1',
+      charset: 'utf-8',
+    },
   },
   supabase: {
     url: process.env.NUXT_PUBLIC_SUPABASE_URL,

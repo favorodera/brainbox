@@ -7,13 +7,13 @@
       width="128"
       height="128"
       alt="Brainbox Logo"
-      class="rounded-xl bg-black shadow-lg"
+      class="rounded-xl shadow-lg"
       loading="eager"
       fetchpriority="high"
     >
 
     <h1
-      class="mt-4 text-center text-3xl leading-none font-bold tracking-tight"
+      class="mt-4 text-3xl font-bold tracking-tight"
     >
       Brainbox
     </h1>

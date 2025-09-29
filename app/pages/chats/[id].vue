@@ -167,7 +167,7 @@ import type { CommandPaletteGroup, CommandPaletteItem } from '@nuxt/ui'
 
 definePageMeta({
   layout: 'chat',
-  title: 'Chat',
+  // title: 'Chat',
 })
 
 const route = useRoute()
@@ -209,6 +209,12 @@ const { execute: persist } = useRequest(`/api/chats/${route.params.id}/persist/`
 
 // Access chats store for title refresh and initial prompt
 const { chats: { refresh }, getChatById, initPrompt } = useChatsStore()
+
+const pageTitle = computed(() => getChatById(route.params.id as string)?.title || 'Untitled')
+
+useHead({
+  title: pageTitle,
+})
 
 const prompt = ref('')
 
