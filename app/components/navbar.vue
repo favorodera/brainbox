@@ -28,19 +28,13 @@
         class="lg:hidden"
       />
 
-      <template v-else>
-        <UButton
-          label="Log in"
-          to="/auth"
-        />
+      <UButton
+        v-else
+        icon="lucide:lock"
+        label="Log in"
+        to="/auth"
+      />
 
-        <UButton
-          label="Sign up"
-          color="neutral"
-          variant="soft"
-          to="/auth"
-        />
-      </template>
             
     </template>
 

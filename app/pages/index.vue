@@ -44,6 +44,14 @@
 
           </UChatPrompt>
 
+          <UAlert
+            v-if="!user"
+            color="info"
+            variant="subtle"
+            icon="lucide:info"
+            title="You're not logged in"
+            description="Sign in to save your chats and access your history across devices."
+          />
         </UContainer>
 
       </template>

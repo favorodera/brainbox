@@ -55,13 +55,15 @@ async function signOut() {
   try {
     await auth.signOut()
     
-    await nextTick(() => emit('close', false))
+    await nextTick()
+    emit('close', false)
 
-    await nextTick(() => toast.add({
+    await nextTick()
+    toast.add({
       title: 'Sign out successful',
       color: 'success',
       icon: 'lucide:check',
-    }))
+    })
 
     await navigateTo('/auth')
    
