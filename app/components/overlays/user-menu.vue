@@ -58,10 +58,6 @@ const dropdownMenuItems = ref<DropdownMenuItem[][]>([
 
   [
     {
-      label: 'Help',
-      icon: 'lucide:help-circle',
-    },
-    {
       label: 'Log out',
       icon: 'lucide:log-out',
       color: 'error',

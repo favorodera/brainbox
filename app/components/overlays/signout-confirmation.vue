@@ -44,6 +44,8 @@
 <script setup lang="ts">
 const emit = defineEmits<{ close: [boolean] }>()
 
+const overlay = useOverlay()
+
 const { auth } = useSupabaseClient()
 const user = useSupabaseUser()
 
@@ -53,17 +55,15 @@ async function signOut() {
   try {
     await auth.signOut()
     
-    await nextTick()
-    emit('close', false)
-
-    await nextTick()
     toast.add({
       title: 'Sign out successful',
       color: 'success',
       icon: 'lucide:check',
     })
 
-    await navigateTo('/auth')
+    overlay.closeAll()
+
+    await navigateTo('/')
    
   } catch {
     toast.add({

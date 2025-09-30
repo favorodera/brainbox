@@ -19,6 +19,7 @@
         color="error"
         variant="link"
         label="Delete all"
+        @click="deleteAllChatsModal.open()"
       />
 
     </div>
@@ -35,7 +36,9 @@
         color="error"
         variant="link"
         label="Delete all"
+        @click="deleteAllDocsModal.open()"
       />
+
 
     </div>
 
@@ -44,3 +47,12 @@
 
 
 </template>
+
+<script setup lang="ts">
+import { LazyOverlaysDeleteAllChatsConfirmation, LazyOverlaysDeleteAllDocsConfirmation } from '#components'
+
+const overlay = useOverlay()
+
+const deleteAllChatsModal = overlay.create(LazyOverlaysDeleteAllChatsConfirmation)
+const deleteAllDocsModal = overlay.create(LazyOverlaysDeleteAllDocsConfirmation)
+</script>
