@@ -3,7 +3,7 @@
  *
  * Provides access to the user's personalized documentation URLs.
  */
-export const useContextsStore = createStore('contexts-store', ({ request }) => {
+export const useContextsStore = createStore('contexts-store', ({ state, getter, request }) => {
 
   /**
    * Reactive list of documentation contexts for the current user.
@@ -18,8 +18,20 @@ export const useContextsStore = createStore('contexts-store', ({ request }) => {
     },
   ))
 
+  // Context items
+  const contextItems = getter(() => ([
+    [
+      { type: 'label', label: 'Docs', icon: 'lucide:book-open' },
+      ...(docs.data.value || []).map(doc => ({ label: doc.name, value: doc.url })),
+    ],
+  ]))
+
+  const contextItemsModelValue = state([])
+
   return {
     docs,
+    contextItems,
+    contextItemsModelValue,
   }
 
 })

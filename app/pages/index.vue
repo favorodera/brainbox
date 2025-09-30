@@ -37,36 +37,21 @@
 
             <template #header>
 
-              <UPopover
-                arrow
-                :content="{
-                  align: 'start',
-                  sideOffset: 5,
-                }"
-                size="sm"
-              >
-                <UTooltip text="Add Context">
-                  <UButton
-                    label="@"
-                    color="neutral"
-                    variant="subtle"
-                    size="sm"
-                  />
-                </UTooltip>
-
-                <template #content>
-                  <UCommandPalette
-                    v-model="commandPalletteValue"
-                    :loading="docsStatus === 'fetching'"
-                    :fuse="{ fuseOptions: { includeMatches: true } }"
-                    multiple
-                    placeholder="Add relevant context..."
-                    :groups="commandPalletteGroups"
-                    :ui="{ input: '[&>input]:h-8 [&>input]:text-sm' }"
-                  />
-                </template>
-              </UPopover>
-
+              <UInputMenu
+                v-model="contextItemsModelValue"
+                :loading="docsStatus === 'fetching'"
+                multiple
+                :items="contextItems"
+                placeholder="Add relevant context..."
+                variant="none"
+                icon="lucide:at-sign"
+                class="w-fit"
+                :ui="{ content: 'min-w-fit max-w-48', trailingIcon: 'hidden' }"
+                :filter-fields="['label', 'value']"
+                value-key="value"
+                :trailing="false"
+                open-on-click
+              />
 
             </template>
 
@@ -100,7 +85,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { CommandPaletteGroup, CommandPaletteItem } from '@nuxt/ui'
+
 
 definePageMeta({
   layout: 'chat',
@@ -110,7 +95,7 @@ const { start } = useQueueStorage()
 
 const { initPrompt } = useChatsStore()
 
-const { data: docs, status: docsStatus } = useContextsStore('docs')
+const { contextItems, contextItemsModelValue, docs: { status: docsStatus } } = useContextsStore()
 
 const user = useSupabaseUser()
 
@@ -144,42 +129,6 @@ const { status, execute } = useRequest<string>('/api/chats/', {
 const idlePromptBox = computed(() => {
   return status.value === 'pending' || status.value === 'success'
 })
-
-/**
- * Computed list of user's Docs for the command palette.
- * Each doc is mapped to a palette item with icon, label, and URL.
- */
-const mappedDocs = computed(() =>
-  (docs.value || []).map(doc => ({
-    icon: 'lucide:book-open', // Book icon for docs
-    label: doc.name, // Doc name as label
-    suffix: doc.url, // Doc URL as suffix
-  })),
-)
-
-/**
- * Value for the command palette (not used here, but can be set for selection).
- */
-const commandPalletteValue = ref([])
-
-/**
- * Command palette groups for quick access to Docs/tools.
- * Includes a "Docs" group with all mapped docs as children.
- */
-const commandPalletteGroups = ref<CommandPaletteGroup<CommandPaletteItem>[]>([
-  {
-    id: 'tools',
-    items: [
-      {
-        icon: 'lucide:book-open',
-        label: 'Docs',
-        placeholder: 'Search Documentations...',
-        children: [...mappedDocs.value],
-      },
-    ],
-  },
-])
-
 
 onMounted(() => {
   if (user.value) {
