@@ -19,3 +19,18 @@ export type QueuedMessage = UIMessageExtension & {
   retries: number
   nextAttempt: number
 }
+
+/**
+ * Chat context type
+ */
+export type ChatContextType = 'docs'
+
+/**
+ * Relevant context for LLM for better response.
+ */
+export type ChatContext = {
+  docs?: {
+    label: string
+    value: string
+  }[]
+}

@@ -3,7 +3,7 @@
  *
  * Route: POST /api/chats/:id
  * Auth: Required (Supabase session cookie)
- * Body: { messages: UIMessage[] }
+ * Body: { messages: UIMessage[], context: ChatContext }
  * Response: Streamed UI message chunks
  */
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
@@ -21,6 +21,7 @@ const paramsSchema = z.object({
 // Request body validation schema
 const bodySchema = z.object({
   messages: z.array(z.custom<UIMessage>()),
+  context: z.custom<ChatContext>().optional(),
 })
 
 // POST /api/chats/:id → validates, streams model output, saves messages
@@ -42,7 +43,7 @@ export default defineLazyEventHandler(() => {
   })
 
   const model = google('gemini-2.5-flash')
-  const { title } = systemPrompt()
+  const { title, chat: chatSystemPrompt } = systemPrompt()
 
   return defineEventHandler(async (event) => {
 
@@ -82,7 +83,7 @@ export default defineLazyEventHandler(() => {
       }
 
       const { id } = validateParams.data
-      const { messages } = validateBody.data
+      const { messages, context } = validateBody.data
 
       const client = await serverSupabaseClient<Database>(event)
 
@@ -159,7 +160,7 @@ export default defineLazyEventHandler(() => {
 
           const result = streamText({
             model,
-            system: 'You are a helpful assistant that can answer questions and help.',
+            system: chatSystemPrompt(context),
             messages: convertToModelMessages(messages),
           })
 

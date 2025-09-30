@@ -1,3 +1,5 @@
+import type { ChatContext } from '../types/ai'
+
 /**
  * System prompt used to generate concise chat titles from the first user message.
  */
@@ -21,9 +23,44 @@ Examples:
 "???" → "General Chat"
 `
 
+/**
+ * Base system prompt for Brainbox AI assistant.
+ */
+const systemBase = `
+You name is Brainbox, a helpful, knowledgeable AI assistant.
+
+Your goals:
+- Provide clear, concise, and accurate answers.
+- Use natural, conversational language while staying professional.
+- When context is provided, always prioritize and incorporate it into your answers.
+- If the context contains relevant information, use it to give more specific, grounded responses.
+- If context is missing or incomplete, answer to the best of your knowledge and note any assumptions.
+
+Guidelines:
+- Be direct and avoid unnecessary filler words.
+- Structure answers logically (lists, steps, or short paragraphs).
+- When explaining, prefer simple terms first, then add details if needed.
+- If user input is vague, ask clarifying questions before assuming.
+`
+
+function chat(context: ChatContext = {}) {
+  let extra = ''
+
+  // Docs
+  if (context.docs?.length) {
+    extra
+      += '\n\nRelevant documents:\n'
+        + context.docs.map(doc => `- ${doc.label}: ${doc.value}`).join('\n')
+  }
+  console.log(systemBase + extra)
+  return systemBase + extra
+}
+
 export default function () {
   return {
     /** System prompt for titles generation */
     title,
+    /** System prompt for Brainbox assistant with optional context injection */
+    chat,
   }
 }

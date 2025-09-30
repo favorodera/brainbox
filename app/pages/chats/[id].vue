@@ -114,7 +114,6 @@
                     class="w-fit"
                     :ui="{ content: 'min-w-fit max-w-48', trailingIcon: 'hidden' }"
                     :filter-fields="['label', 'value']"
-                    value-key="value"
                     :trailing="false"
                     open-on-click
                   />
@@ -155,7 +154,7 @@ definePageMeta({
 
 const route = useRoute()
 
-const { contextItems, contextItemsModelValue, docs: { status: docsStatus } } = useContextsStore()
+const { contextItems, contextItemsModelValue, refinedContextItems, docs: { status: docsStatus } } = useContextsStore()
 
 const { start } = useQueueStorage()
 
@@ -251,7 +250,12 @@ const chat = new Chat({
 function handleSubmit() {
   chat.sendMessage(
     { text: prompt.value },
-    { headers: useRequestHeaders(['cookie']) },
+    {
+      headers: useRequestHeaders(['cookie']),
+      body: {
+        context: { ...refinedContextItems.value },
+      },
+    },
   )
   prompt.value = ''
 }
