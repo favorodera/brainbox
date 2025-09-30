@@ -1,17 +1,7 @@
-/**
- * Returns the authenticated user's personalization docs array.
- *
- * Route: GET /api/docs
- * Auth: Required (Supabase session cookie)
- * Response: Array<{ name: string; url: string }>
- */
+// GET /api/docs → Gets user's docs.
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 
-/**
- * Fetches the user's stored URLs from Supabase.
- */
 export default defineEventHandler(async (event) => {
-
   try {
     const user = await serverSupabaseUser(event)
 
@@ -23,7 +13,6 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Supabase client scoped to this request
     const client = await serverSupabaseClient<Database>(event)
 
     const { error, data } = await client
@@ -40,7 +29,6 @@ export default defineEventHandler(async (event) => {
       })
     }
     
-    // Return the stored docs array
     return data.docs
 
   } catch (error) {

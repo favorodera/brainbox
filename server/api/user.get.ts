@@ -1,7 +1,6 @@
-// Returns the authenticated user's public profile fields
+// GET /api/user → fetches name, avatar, email for current user
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 
-// GET /api/user → fetches id, name, avatar, email for current user
 export default defineEventHandler(async (event) => {
 
   try {

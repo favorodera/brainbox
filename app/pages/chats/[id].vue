@@ -1,9 +1,3 @@
-<!--
-  Chat page renders a single conversation with streaming AI responses.
-  - Header: navbar
-  - Body: messages list and prompt input
-  - Handles retry persistence and title refresh on first message
--->
 <template>
   <div class="grid w-full">
 
@@ -154,24 +148,45 @@ definePageMeta({
 
 const route = useRoute()
 
-const { contextItems, contextItemsModelValue, refinedContextItems, docs: { status: docsStatus } } = useContextsStore()
+const { chats: { refresh }, getChatById, initPrompt } = useChatsStore()
+const prompt = ref('')
 
-const { start } = useQueueStorage()
+const { start, add } = useQueueStorage()
+
+const pageTitle = computed(() => getChatById(route.params.id as string)?.title || 'Untitled')
+
+useHead({
+  title: pageTitle,
+})
+
+const {
+  contextItems,
+  contextItemsModelValue,
+  refinedContextItems,
+  docs: {
+    status: docsStatus,
+  },
+} = useContextsStore()
+
 
 // MDC component mapping (streamed code blocks)
 const components = {
   pre: ProseStreamPre as unknown as DefineComponent,
 }
 
-const { add } = useQueueStorage()
+const toast = useToast()
 
-// Load chat thread and messages for the given id
-const { data, status, error, execute } = await useFetch<{ id: string, messages: UIMessage[], title: string }>(`/api/chats/${route.params.id}`, {
+const { data, status, error, execute } = await useFetch<{
+  id: string
+  messages: UIMessage[]
+  title: string
+}>(`/api/chats/${route.params.id}`, {
   headers: useRequestHeaders(['cookie']),
   method: 'GET',
   key: `chat-${route.params.id}`,
   watch: [route],
 })
+
 
 // Persist assistant messages; on failure queue locally for retry
 const { execute: persist } = useRequest(`/api/chats/${route.params.id}/persist/`, {
@@ -189,26 +204,11 @@ const { execute: persist } = useRequest(`/api/chats/${route.params.id}/persist/`
   },
 }, false)
 
-// Access chats store for title refresh and initial prompt
-const { chats: { refresh }, getChatById, initPrompt } = useChatsStore()
-
-const pageTitle = computed(() => getChatById(route.params.id as string)?.title || 'Untitled')
-
-useHead({
-  title: pageTitle,
-})
-
-const prompt = ref('')
-
-const toast = useToast()
-
-// Clipboard utility for message copy action
 const { copy, copied } = useClipboard({
   copiedDuring: 1000,
   legacy: true,
 })
 
-// Copy a message's text content
 function handleCopy(event: MouseEvent, message: UIMessage) {
   copy(getTextFromMessage(message))
 }
@@ -222,7 +222,6 @@ if (!data.value) {
   })
 }
 
-// Chat controller handles sending and streaming messages
 const chat = new Chat({
   id: data.value.id,
   messages: data.value.messages,
@@ -246,7 +245,7 @@ const chat = new Chat({
   },
 })
 
-// Submit prompt and stream assistant response
+// Submit prompt and context and stream assistant response
 function handleSubmit() {
   chat.sendMessage(
     { text: prompt.value },
@@ -261,13 +260,17 @@ function handleSubmit() {
 }
 
 
-// If an init prompt exists (from home), send it once page mounts
 onMounted(() => {
-
+  // Sends initial prompt and context
   if (initPrompt.value.trim() !== '') {
     chat.sendMessage(
       { text: initPrompt.value },
-      { headers: useRequestHeaders(['cookie']) },
+      {
+        headers: useRequestHeaders(['cookie']),
+        body: {
+          context: { ...refinedContextItems.value },
+        },
+      },
     )
     initPrompt.value = ''
   }

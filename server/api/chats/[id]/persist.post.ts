@@ -1,24 +1,13 @@
-/**
- * Persists an AI response message to the database for a given chat.
- *
- * Route: POST /api/chats/:id/persist
- * Auth: Required (Supabase session cookie)
- * Body: { message: UIMessage }
- * Response: 'OK'
- */
+// POST /api/chats/:id/persist → persists LLM response to database
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import { z } from 'zod'
 import type { UIMessage } from 'ai'
 
-/** Route params validation schema */
 const paramsSchema = z.object({
-  /** Chat ID */
   id: z.string(),
 })
 
-/** Body validation schema */
 const bodySchema = z.object({
-  /** Assistant UI message to persist */
   message: z.custom<UIMessage>(),
 })
 
@@ -63,7 +52,6 @@ export default defineEventHandler(async (event) => {
 
     const client = await serverSupabaseClient<Database>(event)
 
-    // Store minimal fields used by the UI
     const payload = {
       chat_id: id,
       role: message.role,

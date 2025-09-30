@@ -1,4 +1,3 @@
-<!-- Data controls: manage stored chat data and bulk actions -->
 <template>
 
   <div class="space-y-2">
@@ -45,11 +44,3 @@
 
 
 </template>
-
-<script setup lang="ts">
-
-</script>
-
-<style scoped>
-
-</style>

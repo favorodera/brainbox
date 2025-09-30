@@ -1,4 +1,3 @@
-<!-- Account settings: user profile summary and plan usage -->
 <template>
 
   <div class="space-y-2">
@@ -34,7 +33,3 @@
 <script setup lang="ts">
 const { data: user } = await useUserStore('user')
 </script>
-
-<style scoped>
-
-</style>

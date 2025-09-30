@@ -1,4 +1,3 @@
-<!-- Confirmation modal to delete a chat -->
 <template>
 
   <UModal
@@ -57,11 +56,8 @@ const props = defineProps<{
 }>()
 
 const route = useRoute()
-
 const emit = defineEmits<{ close: [boolean] }>()
-
 const toast = useToast()
-
 const { refresh } = useChatsStore('chats')
 
 const { execute, status } = useRequest(`/api/chats/${props.chatId}`, {

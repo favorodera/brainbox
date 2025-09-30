@@ -47,9 +47,6 @@ async function add(
   }
 }
 
-/**
- * Removes a message from the retry queue by id.
- */
 async function remove(id: string) {
   await storage.removeItem(keyHelper(id))
 }

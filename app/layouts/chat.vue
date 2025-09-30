@@ -108,15 +108,13 @@
 import { LazyOverlaysDeleteChatConfirmation } from '#components'
 import type { CommandPaletteGroup, CommandPaletteItem, NavigationMenuItem } from '@nuxt/ui'
 
-const overlay = useOverlay()
-
-const deleteChatConfirmationModal = overlay.create(LazyOverlaysDeleteChatConfirmation)
-
-const isCommandPaletteOpen = ref(false)
-
 const user = useSupabaseUser()
 
 const { data: chats } = await useChatsStore('chats')
+
+const overlay = useOverlay()
+const deleteChatConfirmationModal = overlay.create(LazyOverlaysDeleteChatConfirmation)
+const isCommandPaletteOpen = ref(false)
 
 const mappedChats = computed(() =>
   (chats.value || []).map(chat => ({

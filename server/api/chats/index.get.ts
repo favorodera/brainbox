@@ -1,15 +1,6 @@
-/**
- * Lists the current user's chats with minimal metadata for the sidebar and command pallette.
- *
- * Route: GET /api/chats
- * Auth: Required (Supabase session cookie)
- * Response: Array<{ id: string; title: string | null }>
- */
+// GET /api/chats → Lists the current user's chats
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 
-/**
- * Returns chat id and title for the authenticated user.
- */
 export default defineEventHandler(async (event) => {
   try {
 
@@ -23,7 +14,6 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Supabase client scoped to this request
     const client = await serverSupabaseClient<Database>(event)
 
     const { error, data } = await client
@@ -39,7 +29,6 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Minimal payload for listing chats in the UI
     return data
 
   } catch (error) {

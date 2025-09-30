@@ -1,4 +1,3 @@
-<!-- Personalization settings: manage external URLs powering personalization -->
 <template>
 
   <div class="space-y-2">

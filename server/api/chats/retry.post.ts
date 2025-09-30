@@ -1,17 +1,8 @@
-/**
- * Accepts a previously failed UI message and persists it for retry.
- *
- * Route: POST /api/chats/retry
- * Auth: Required (Supabase session cookie)
- * Body: { message: UIMessageExtension }
- * Response: { success: true }
- */
+// POST /api/chats/retry → Retries a 'failed-to-persist' message
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import { z } from 'zod'
 
-/** Body validation schema */
 const schema = z.object({
-  /** UI message to be retried and stored */
   message: z.custom<UIMessageExtension>(),
 })
 
@@ -38,7 +29,6 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Extract validated fields early for clarity
     const { message } = validate.data
     const client = await serverSupabaseClient<Database>(event)
 
@@ -62,7 +52,6 @@ export default defineEventHandler(async (event) => {
       // Chat doesn't exist - return success to remove from queue
       return 'OK'
     }
-
 
     const { error } = await client.from('messages').insert({
       id: message.id,

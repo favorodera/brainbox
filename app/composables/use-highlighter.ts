@@ -2,10 +2,6 @@ import { bundledLanguages, createHighlighter } from 'shiki'
 import type { BundledTheme, BundledLanguage, HighlighterGeneric } from 'shiki'
 import { createJavaScriptRegexEngine } from 'shiki/engine-javascript.mjs'
 
-/**
- * Lazily creates and caches a Shiki highlighter instance for syntax highlighting.
- * The promise is initialized once, then the resolved instance is cached.
- */
 let highlighter: HighlighterGeneric<BundledLanguage, BundledTheme> | null = null
 let highlighterPromise: Promise<HighlighterGeneric<BundledLanguage, BundledTheme>> | null = null
 

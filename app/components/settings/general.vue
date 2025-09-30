@@ -1,4 +1,3 @@
-<!-- General settings: theme selection -->
 <template>
 
   <div class="space-y-2">

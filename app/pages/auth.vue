@@ -96,18 +96,13 @@
 <script setup lang="ts">
 import type { Provider } from '@supabase/auth-js'
 
-const { set, get } = useLastAuthMethod()
-
-const { auth } = useSupabaseClient()
 const user = useSupabaseUser()
+const { auth } = useSupabaseClient()
 
+const { set, get } = useLastAuthMethod()
 const toast = useToast()
 
 const redirectTo = import.meta.dev ? 'http://localhost:3000/callback' : 'https://brainboxaichat.vercel.app/callback'
-
-whenever(() => user.value, async () => {
-  await navigateTo('/callback')
-})
 
 async function authenticate(provider: Provider) {
   try {
@@ -136,4 +131,8 @@ async function authenticate(provider: Provider) {
     })
   }
 }
+
+whenever(() => user.value, async () => {
+  await navigateTo('/callback')
+})
 </script>

@@ -1,15 +1,7 @@
-/**
- * Deletes docs from the authenticated user's personalization list.
- *
- * Route: DELETE /api/docs
- * Auth: Required (Supabase session cookie)
- * Body: { docs: Array<{ name: string; url: string }> }
- * Response: 'OK'
- */
+// DELETE /api/docs → Removes user's docs.
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import { z } from 'zod'
 
-/** Body validation schema for doc entries */
 const schema = z.object({
   docs: z.array(
     z.object({
@@ -19,9 +11,6 @@ const schema = z.object({
   ),
 })
 
-/**
- * Removes provided docs via Postgres RPC for atomic updates.
- */
 export default defineEventHandler(async (event) => {
 
   try {
@@ -36,7 +25,6 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Validate request body
     const validate = await readValidatedBody(event, schema.safeParse)
 
     if (validate.error) {

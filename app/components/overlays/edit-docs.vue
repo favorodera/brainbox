@@ -1,4 +1,3 @@
-<!-- Modal form to edit existing Docs with change detection -->
 <template>
   <UModal
     :close="{ onClick: () => emit('close', false), disabled: status === 'pending' }"
@@ -85,11 +84,9 @@ const props = defineProps<{
 
 const emit = defineEmits<{ close: [boolean] }>()
 
-// Store refresh to re-fetch docs after successful update
 const { refresh } = useContextsStore('docs')
 const toast = useToast()
 
-// Form validation schema for doc entries
 const schema = z.object({
   docs: z.array(
     z.object({
@@ -101,7 +98,6 @@ const schema = z.object({
 
 type Schema = z.output<typeof schema>
 
-// Local copy of the docs to edit in-place
 const state = ref<Schema>({
   docs: props.docs.map(doc => ({ ...doc })),
 })
@@ -115,7 +111,6 @@ const anyChangeOccurred = computed(() => {
 })
 
 
-// Request helper to PATCH docs to the server API
 const { execute, status } = useRequest('/api/docs', {
   $fetch: {
     method: 'PATCH',
@@ -142,7 +137,6 @@ const { execute, status } = useRequest('/api/docs', {
   },
 }, false)
 
-// Submits the form by sending updated docs to the API
 async function handleSubmit(event: FormSubmitEvent<Schema>) {
   await execute({
     $fetch: {

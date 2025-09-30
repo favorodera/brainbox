@@ -1,8 +1,3 @@
-<!--
-  Settings modal with tabbed sections. Content is kept-alive for snappy UX.
-  - Left side: tabs list
-  - Right side: active section content
--->
 <template>
 
   <UModal
@@ -71,8 +66,6 @@ import { LazySettingsGeneral, LazySettingsPersonalization, LazySettingsDataContr
 
 const emit = defineEmits<{ close: [boolean] }>()
 
-
-// Tab configuration driving the left navigation and content component
 const tabsItems = [
 
   { label: 'General', icon: 'lucide:settings', component: LazySettingsGeneral },
@@ -83,7 +76,6 @@ const tabsItems = [
 
 ]
 
-// Currently active settings tab component
 const activeTab = shallowRef(tabsItems[0]?.component)
 
 </script>

@@ -1,4 +1,3 @@
-<!-- Confirmation modal to delete selected Docs -->
 <template>
   <UModal
     :close="{
@@ -64,10 +63,11 @@ const props = defineProps<{
   docs: { name: string, url: string }[]
 }>()
 
+const emit = defineEmits<{ close: [boolean] }>()
+
 const { refresh } = useContextsStore('docs')
 const toast = useToast()
 
-// Request helper to DELETE docs via the server API
 const { execute, status } = useRequest('/api/docs', {
   $fetch: {
     method: 'DELETE',
@@ -96,7 +96,6 @@ const { execute, status } = useRequest('/api/docs', {
   },
 }, false)
 
-const emit = defineEmits<{ close: [boolean] }>()
 
 </script>
 

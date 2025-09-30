@@ -1,4 +1,3 @@
-<!-- Modal form to add multiple Docs with validation -->
 <template>
 
   <UModal
@@ -100,12 +99,10 @@ import z from 'zod'
 
 const emit = defineEmits<{ close: [boolean] }>()
 
-// Store refresh to re-fetch docs after successful submission
 const { refresh } = useContextsStore('docs')
 
 const toast = useToast()
 
-// Form validation schema for doc entries
 const schema = z.object({
   docs: z.array(
     z.object({
@@ -117,12 +114,10 @@ const schema = z.object({
 
 type Schema = z.output<typeof schema>
 
-// Reactive form state containing the list of doc rows
 const state = reactive<Partial<Schema>>({
   docs: [{ name: '', url: '' }],
 })
 
-// Request helper to POST docs to the server API
 const { execute, status } = useRequest('/api/docs', {
   $fetch: {
     method: 'POST',
@@ -150,7 +145,6 @@ const { execute, status } = useRequest('/api/docs', {
   
 }, false)
 
-// Submits the form by sending current docs list to the API
 async function handleSubmit(event: FormSubmitEvent<Schema>) {
 
   await execute({

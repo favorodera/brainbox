@@ -2,15 +2,12 @@ import type { InputMenuItem } from '@nuxt/ui'
 import type { ChatContextType } from '~~/shared/types/ai'
 
 /**
- * Store for managing the authenticated user's context documents.
- *
- * Provides access to the user's personalized documentation URLs.
+ * Store for managing user's chat contexts
  */
 export const useContextsStore = createStore('contexts-store', ({ state, getter, request }) => {
 
   /**
-   * Reactive list of documentation contexts for the current user.
-   * Fetched from the server using the user's session.
+   * Reactive docs list fetched from server for current user.
    */
   const docs = request<{ name: string, url: string }[]>(({ signal }) => $fetch(
     '/api/docs/',
@@ -22,21 +19,20 @@ export const useContextsStore = createStore('contexts-store', ({ state, getter, 
   ))
 
 
-  // Context items
   const contextItems = getter(() => ([
     [
       { type: 'label', label: 'Docs', icon: 'lucide:book-open' },
       ...(docs.data.value || []).map(doc => ({
         label: doc.name,
         value: doc.url,
-        contextType: 'docs' as const, // embed contextType directly
+        contextType: 'docs' as const,
       })),
     ],
   ]))
   
-
   const contextItemsModelValue = state([])
 
+  // Computed: returns refined docs context items for prompt
   const refinedContextItems = getter(() => {
     const items: InputMenuItem & { contextType: ChatContextType }[] = contextItemsModelValue.value
 

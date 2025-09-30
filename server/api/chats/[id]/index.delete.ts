@@ -1,17 +1,8 @@
-/**
- * Deletes a chat if it is owned by the authenticated requester.
- *
- * Route: DELETE /api/chats/:id
- * Auth: Required (Supabase session cookie)
- * Params: { id: string }
- * Response: 'OK'
- */
+// DELETE /api/chats/:id → Deletes chat
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import { z } from 'zod'
 
-/** Route params validation schema */
 const schema = z.object({
-  /** Chat ID */
   id: z.string(),
 })
 

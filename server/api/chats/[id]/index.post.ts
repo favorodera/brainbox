@@ -1,30 +1,20 @@
-/**
- * Streams an AI response for a chat and persists messages/title.
- *
- * Route: POST /api/chats/:id
- * Auth: Required (Supabase session cookie)
- * Body: { messages: UIMessage[], context: ChatContext }
- * Response: Streamed UI message chunks
- */
+// POST /api/chats/:id → validates, streams model output, saves messages
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import { convertToModelMessages, createUIMessageStream, createUIMessageStreamResponse, generateText, streamText } from 'ai'
 import type { UIMessage } from 'ai'
 import { z } from 'zod'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
 
-// Route params validation schema
 const paramsSchema = z.object({
-  /** Chat ID */
   id: z.string(),
 })
 
-// Request body validation schema
 const bodySchema = z.object({
   messages: z.array(z.custom<UIMessage>()),
   context: z.custom<ChatContext>().optional(),
 })
 
-// POST /api/chats/:id → validates, streams model output, saves messages
+
 export default defineLazyEventHandler(() => {
   
   const { googleGenerativeAiKey } = useRuntimeConfig()
@@ -43,7 +33,7 @@ export default defineLazyEventHandler(() => {
   })
 
   const model = google('gemini-2.5-flash')
-  const { title, chat: chatSystemPrompt } = systemPrompt()
+  const { title: titleSystemPrompt, chat: chatSystemPrompt } = systemPrompt()
 
   return defineEventHandler(async (event) => {
 
@@ -58,7 +48,6 @@ export default defineLazyEventHandler(() => {
         })
       }
 
-      // Validate path params
       const validateParams = await getValidatedRouterParams(event, paramsSchema.safeParse)
 
       if (validateParams.error) {
@@ -70,7 +59,6 @@ export default defineLazyEventHandler(() => {
         })
       }
  
-      // Validate request body
       const validateBody = await readValidatedBody(event, bodySchema.safeParse)
  
       if (validateBody.error) {
@@ -110,7 +98,6 @@ export default defineLazyEventHandler(() => {
         })
       }
 
-      // For persistence and titling, inspect the latest message
       const lastMessage = messages[messages.length - 1]
 
       if (lastMessage && lastMessage.role === 'user') {
@@ -134,12 +121,12 @@ export default defineLazyEventHandler(() => {
         }
       }
 
-      // Generate a concise title on first user message if not already set
+      // If not set, generate a concise title using user's first message
       if (!chat.title) {
         try {
           const { text } = await generateText({
             model: model,
-            system: title,
+            system: titleSystemPrompt,
             prompt: JSON.stringify(messages[0]),
           })
           
@@ -154,7 +141,6 @@ export default defineLazyEventHandler(() => {
         }
       }
 
-      // Begin streaming the assistant response to the client
       const stream = createUIMessageStream({
         execute({ writer }) {
 

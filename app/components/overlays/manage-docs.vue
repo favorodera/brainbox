@@ -1,4 +1,3 @@
-<!-- Modal to search, select, and CRUD user Docs -->
 <template>
   <UModal
     :close="{ onClick: () => emit('close', false) }"
@@ -174,12 +173,10 @@
 import { LazyOverlaysAddDocs, LazyOverlaysDeleteDocsConfirmation, LazyOverlaysEditDocs, UButton, UIcon } from '#components'
 import type { TableColumn, TableRow } from '@nuxt/ui'
 
-// Docs store provides list, loading state, error, and refetch
 const { data, status, error, execute } = useContextsStore('docs')
 
 const emit = defineEmits<{ close: [boolean] }>()
 
-// Overlay factory to open nested modals for add/edit/delete
 const overlay = useOverlay()
 const addDocsModal = overlay.create(LazyOverlaysAddDocs)
 const deleteDocsConfirmationModal = overlay.create(LazyOverlaysDeleteDocsConfirmation)
@@ -187,22 +184,18 @@ const editDocsModal = overlay.create(LazyOverlaysEditDocs)
 
 const table = useTemplateRef('table')
 
-// Table pagination state
 const pagination = ref({
   pageIndex: 0,
   pageSize: 10,
 })
 
-// Selected rows and global search filter
 const rowSelection = ref<Record<string, boolean>>({})
 const globalFilter = ref('')
 
-// Toggles selection when a row is clicked
 function onSelect(row: TableRow<{ name: string, url: string }>, _event?: Event) {
   row.toggleSelected()
 }
 
-// Derives the list of selected doc objects
 const selectedRows = computed((): { name: string, url: string }[] => {
   const tableApi = table.value?.tableApi
   if (!tableApi) return []
@@ -210,7 +203,6 @@ const selectedRows = computed((): { name: string, url: string }[] => {
 })
 
 
-// Table column definitions and custom cell to show name+URL
 const columns = ref<TableColumn<{ name: string, url: string }>[]>([
   {
     accessorKey: 'name',

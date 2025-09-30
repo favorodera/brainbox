@@ -1,8 +1,6 @@
+// Provides system prompts for chat title and assistant context injection
 import type { ChatContext } from '../types/ai'
 
-/**
- * System prompt used to generate concise chat titles from the first user message.
- */
 const title = `
 Create a short title (3 to 5 words, max 30 characters) based only on the user's first message.
 
@@ -23,9 +21,6 @@ Examples:
 "???" → "General Chat"
 `
 
-/**
- * Base system prompt for Brainbox AI assistant.
- */
 const systemBase = `
 You name is Brainbox, a helpful, knowledgeable AI assistant.
 
@@ -52,7 +47,6 @@ function chat(context: ChatContext = {}) {
       += '\n\nRelevant documents:\n'
         + context.docs.map(doc => `- ${doc.label}: ${doc.value}`).join('\n')
   }
-  console.log(systemBase + extra)
   return systemBase + extra
 }
 

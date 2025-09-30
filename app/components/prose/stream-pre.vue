@@ -1,4 +1,3 @@
-<!-- Syntax-highlighted code block renderer backed by cached Shiki highlighter -->
 <template>
   <ProsePre v-bind="props">
     <ShikiCachedRenderer
@@ -17,7 +16,6 @@ import { ShikiCachedRenderer } from 'shiki-stream/vue'
 const colorMode = useColorMode()
 const highlighter = await useHighlighter()
 
-// Props passed by content renderer for code blocks
 const props = defineProps<{
   code: string
   language: string
@@ -46,8 +44,9 @@ const lang = computed(() => {
   }
 })
 
-// Rerender when theme or language changes to refresh highlighting
+// Unique key for rerendering on theme/lang change
 const key = computed(() => {
+  
   return `${lang.value}-${colorMode.value}`
 })
 </script>

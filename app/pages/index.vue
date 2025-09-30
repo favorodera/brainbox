@@ -28,7 +28,7 @@
             autofocus
             autoresize
             :maxrows="6"
-            :disabled="idlePromptBox"
+            :disabled="idlePromptBox || !user"
             :ui="{
               body: 'items-end',
             }"
@@ -41,6 +41,7 @@
                 v-model="contextItemsModelValue"
                 :loading="docsStatus === 'fetching'"
                 multiple
+                :disabled="!user"
                 :items="contextItems"
                 placeholder="Add relevant context..."
                 variant="none"
@@ -59,7 +60,7 @@
               type="submit"
               icon="lucide:send"
               :loading="idlePromptBox"
-              :disabled="idlePromptBox || prompt.trim() === ''"
+              :disabled="idlePromptBox || prompt.trim() === '' || !user"
             />
 
           </UChatPrompt>
@@ -85,23 +86,26 @@
 </template>
 
 <script lang="ts" setup>
-
-
 definePageMeta({
   layout: 'chat',
 })
 
-const { start } = useQueueStorage()
-
-const { initPrompt } = useChatsStore()
-
-const { contextItems, contextItemsModelValue, docs: { status: docsStatus } } = useContextsStore()
-
 const user = useSupabaseUser()
 
-const toast = useToast()
-
+const { initPrompt } = useChatsStore()
 const prompt = ref('')
+
+const { start } = useQueueStorage()
+
+const {
+  contextItems,
+  contextItemsModelValue,
+  docs: {
+    status: docsStatus,
+  },
+} = useContextsStore()
+
+const toast = useToast()
 
 const { status, execute } = useRequest<string>('/api/chats/', {
   $fetch: {
@@ -132,7 +136,7 @@ const idlePromptBox = computed(() => {
 
 onMounted(() => {
   if (user.value) {
-    // If the user is authenticated, start the retry queue worker to process the retry queue
+    // Start the retry queue worker
     start()
   }
 })

@@ -1,4 +1,3 @@
-<!-- Profile dropdown with settings and sign-out actions -->
 <template>
   <UDropdownMenu
     :items="dropdownMenuItems"
