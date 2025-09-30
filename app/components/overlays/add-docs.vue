@@ -3,7 +3,7 @@
   <UModal
     :close="{ onClick: () => emit('close', false), disabled: status === 'pending' }"
     title="Add New Docs"
-    description="Add new docs for personalization."
+    description="Add new docs for indexing and crawling"
     :ui="{
       content: 'max-w-2xl',
     }"

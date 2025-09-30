@@ -98,6 +98,7 @@
                 <template #header>
 
                   <UInputMenu
+                    id="context-menu"
                     v-model="contextItemsModelValue"
                     :loading="docsStatus === 'fetching'"
                     multiple

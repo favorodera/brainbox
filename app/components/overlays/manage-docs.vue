@@ -2,7 +2,7 @@
   <UModal
     :close="{ onClick: () => emit('close', false) }"
     title="Manage Docs"
-    description="Add, edit, or remove the docs used for personalization."
+    description="Crawl and index custom resources and documentations"
     :ui="{ content: 'max-w-2xl' }"
     :dismissible="false"
   >
@@ -31,55 +31,27 @@
             >
 
               <UButton
-                :label="`Edit (${selectedRows.length})`"
+                label="Edit"
                 size="sm"
+                color="neutral"
                 variant="soft"
-                icon="lucide:edit"
-                class="max-sm:hidden"
                 @click="editDocsModal.open({ docs: selectedRows })"
               />
 
               <UButton
-                :label="`Delete (${selectedRows.length})`"
+                label="Delete"
                 color="error"
                 variant="soft"
                 size="sm"
-                icon="lucide:trash-2"
-                class="max-sm:hidden"
                 @click="deleteDocsConfirmationModal.open({ docs: selectedRows })"
               />
-
-              <UDropdownMenu
-                class="min-sm:hidden"
-                :items="[
-                  {
-                    label: `Edit ${selectedRows.length}`,
-                    icon: 'lucide:edit',
-                    onSelect: () => editDocsModal.open({ docs: selectedRows }),
-                  },
-                  {
-                    label: `Delete ${selectedRows.length}`,
-                    icon: 'lucide:trash-2',
-                    onSelect: () => deleteDocsConfirmationModal.open({ docs: selectedRows }),
-                    color: 'error',
-                  },
-                ]"
-              >
-                <UButton
-                  label="Actions"
-                  variant="soft"
-                  class="min-sm:hidden"
-                  size="sm"
-                  trailing
-                  icon="lucide:chevron-down"
-                />
-              </UDropdownMenu>
             </div>
 
             <UButton
               v-else
-              label="Add"
+              label="Add Docs"
               color="neutral"
+              variant="soft"
               size="sm"
               @click="addDocsModal.open()"
             />
@@ -90,7 +62,6 @@
           <UTable
             ref="table"
             v-model:pagination="pagination"
-            v-model:row-selection="rowSelection"
             v-model:global-filter="globalFilter"
             caption="Docs Table"
             class="shrink-0"
@@ -100,9 +71,8 @@
             sticky
             :ui="{
               thead: 'hidden',
-              td: 'cursor-pointer p-2',
+              td: 'p-2',
             }"
-            @select="onSelect"
           />
 
           <div class="flex flex-col-reverse items-center justify-between gap-3 sm:flex-row">
@@ -115,7 +85,15 @@
               </template>
 
               <template v-else>
-                Total docs: {{ data.length }}
+
+                <template v-if="table?.tableApi?.getSelectedRowModel().rows.length">
+                  Selected: {{ table?.tableApi?.getSelectedRowModel().rows.length }} of
+                  {{ data.length }} docs
+                </template>
+
+                <template v-else>
+                  Total docs: {{ data.length }}
+                </template>
               </template>
             </p>
 
@@ -170,8 +148,8 @@
 </template>
 
 <script setup lang="ts">
-import { LazyOverlaysAddDocs, LazyOverlaysDeleteDocsConfirmation, LazyOverlaysEditDocs, UButton, UIcon } from '#components'
-import type { TableColumn, TableRow } from '@nuxt/ui'
+import { LazyOverlaysAddDocs, LazyOverlaysDeleteDocsConfirmation, LazyOverlaysEditDocs, UButton, UCheckbox, UIcon } from '#components'
+import type { TableColumn } from '@nuxt/ui'
 
 const { data, status, error, execute } = useContextsStore('docs')
 
@@ -189,12 +167,7 @@ const pagination = ref({
   pageSize: 10,
 })
 
-const rowSelection = ref<Record<string, boolean>>({})
 const globalFilter = ref('')
-
-function onSelect(row: TableRow<{ name: string, url: string }>, _event?: Event) {
-  row.toggleSelected()
-}
 
 const selectedRows = computed((): { name: string, url: string }[] => {
   const tableApi = table.value?.tableApi
@@ -204,6 +177,16 @@ const selectedRows = computed((): { name: string, url: string }[] => {
 
 
 const columns = ref<TableColumn<{ name: string, url: string }>[]>([
+  {
+    id: 'select',
+    cell: ({ row }) =>
+      h(UCheckbox, {
+        'modelValue': row.getIsSelected(),
+        'onUpdate:modelValue': (value: boolean | 'indeterminate') => row.toggleSelected(!!value),
+        'aria-label': 'Select row',
+        'id': 'select-row',
+      }),
+  },
   {
     accessorKey: 'name',
     header: 'Name',
@@ -219,9 +202,7 @@ const columns = ref<TableColumn<{ name: string, url: string }>[]>([
   {
     id: 'urlDisplay',
     header: '',
-    cell: ({ row }) => h('div', {
-      class: `${row.getIsSelected() ? 'text-default' : 'text-muted'}`,
-    }, [
+    cell: ({ row }) => h('div', {}, [
       h('p', { class: 'truncate text-sm font-medium' }, row.original.name),
       h('p', { class: 'truncate text-xs' }, row.original.url),
     ]),

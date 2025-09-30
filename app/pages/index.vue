@@ -38,6 +38,7 @@
             <template #header>
 
               <UInputMenu
+                id="context-menu"
                 v-model="contextItemsModelValue"
                 :loading="docsStatus === 'fetching'"
                 multiple
@@ -49,7 +50,6 @@
                 class="w-fit"
                 :ui="{ content: 'min-w-fit max-w-48', trailingIcon: 'hidden' }"
                 :filter-fields="['label', 'value']"
-                value-key="value"
                 :trailing="false"
                 open-on-click
               />

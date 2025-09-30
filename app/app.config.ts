@@ -14,6 +14,11 @@ export default defineAppConfig({
         base: 'cursor-pointer',
       },
     },
+    checkbox: {
+      slots: {
+        root: 'cursor-pointer',
+      },
+    },
     dropdownMenu: {
       slots: {
         item: 'cursor-pointer',
