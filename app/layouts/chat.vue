@@ -44,11 +44,9 @@
         </div>
 
         <UNavigationMenu
-          :collapsed="collapsed"
           orientation="vertical"
-          tooltip
           :items="navigationMenuItems"
-          popover
+          :class="collapsed ? 'hidden' : 'block'"
           :ui="{ link: 'overflow-hidden' }"
           :unmount-on-hide="false"
         >
